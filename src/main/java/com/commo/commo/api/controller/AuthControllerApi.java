@@ -1,0 +1,52 @@
+package com.commo.commo.api.controller;
+
+import com.commo.commo.api.documentation.ApiDocumentedController;
+import com.commo.commo.api.documentation.DefaultApiResponses;
+import com.commo.commo.api.dto.auth.LoginRequest;
+import com.commo.commo.api.dto.auth.LoginResponse;
+import com.commo.commo.api.dto.auth.RefreshRequest;
+import com.commo.commo.api.dto.auth.RegisterRequest;
+import com.commo.commo.api.dto.auth.UserResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
+/**
+ * Interface do controller de autenticação OAuth 2.0 com JWT.
+ * Contém as anotações de endpoint e assinaturas dos métodos.
+ * O controller deve usar @RequestMapping("/auth").
+ *
+ * @author Commo
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
+@Tag(name = ApiDocumentedController.TAG_AUTH, description = "Login, refresh de tokens e registro de usuários")
+@DefaultApiResponses
+@SecurityRequirements
+public interface AuthControllerApi {
+
+    @Operation(summary = "Login", description = "Autentica usuário com username e senha, retornando access e refresh tokens JWT")
+    @ApiResponse(responseCode = "200", description = "Login realizado com sucesso", content = @Content(schema = @Schema(implementation = LoginResponse.class)))
+    @ApiResponse(responseCode = "401", description = "Credenciais inválidas ou conta bloqueada")
+    @PostMapping("/login")
+    ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request);
+
+    @Operation(summary = "Refresh token", description = "Renova o access token usando um refresh token válido")
+    @ApiResponse(responseCode = "200", description = "Tokens renovados com sucesso", content = @Content(schema = @Schema(implementation = LoginResponse.class)))
+    @ApiResponse(responseCode = "401", description = "Refresh token inválido ou expirado")
+    @PostMapping("/refresh")
+    ResponseEntity<LoginResponse> refresh(@Valid @RequestBody RefreshRequest request);
+
+    @Operation(summary = "Registro", description = "Cadastra novo usuário no sistema")
+    @ApiResponse(responseCode = "201", description = "Usuário criado com sucesso", content = @Content(schema = @Schema(implementation = UserResponse.class)))
+    @ApiResponse(responseCode = "400", description = "Dados inválidos ou username/email já existente")
+    @PostMapping("/register")
+    ResponseEntity<UserResponse> register(@Valid @RequestBody RegisterRequest request);
+}

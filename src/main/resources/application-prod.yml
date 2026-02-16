@@ -1,0 +1,43 @@
+# Ambiente: Produção
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT:5432}/commo-db
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 10
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 1200000
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
+
+  devtools:
+    restart:
+      enabled: false
+
+commo:
+  jwt:
+    secret: ${JWT_SECRET}
+    access-token-validity: ${JWT_ACCESS_VALIDITY:900}
+    refresh-token-validity: ${JWT_REFRESH_VALIDITY:604800}
+
+server:
+  port: ${SERVER_PORT:8080}
+  compression:
+    enabled: true
+  http2:
+    enabled: true
+
+logging:
+  level:
+    com.commo: WARN
+    org.springframework: WARN

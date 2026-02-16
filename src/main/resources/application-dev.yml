@@ -1,0 +1,39 @@
+# Ambiente: Desenvolvimento Local (PostgreSQL obrigatório)
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/commo-db
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 2
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: false
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
+
+
+  devtools:
+    restart:
+      enabled: true
+
+server:
+  port: ${SERVER_PORT:8080}
+
+commo:
+  jwt:
+    secret: ${JWT_SECRET:a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e1f2}
+    access-token-validity: 900
+    refresh-token-validity: 604800
+
+logging:
+  level:
+    com.commo: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
