@@ -1,9 +1,9 @@
 spring:
   application:
-    name: commo
+    name: vendalume
 
   profiles:
-    active: ${SPRING_PROFILES_ACTIVE:dev-h2}
+    active: ${SPRING_PROFILES_ACTIVE:dev}
 
   jackson:
     time-zone: America/Sao_Paulo
@@ -14,7 +14,7 @@ spring:
       connection-timeout: 30000
       maximum-pool-size: 10
       minimum-idle: 5
-      pool-name: CommoHikariPool
+      pool-name: VendaLumeHikariPool
 
   jpa:
     hibernate:
@@ -46,7 +46,7 @@ springdoc:
     filter: true
     try-it-out-enabled: true
 
-commo:
+vendalume:
   jwt:
     secret: ${JWT_SECRET:}
     access-token-validity: ${JWT_ACCESS_VALIDITY:900}

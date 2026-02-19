@@ -2,11 +2,11 @@
 # Requer: API rodando em http://localhost:8080
 # Uso: .\create-default-user.ps1
 
-$apiUrl = $env:COMMO_API_URL ?? "http://localhost:8080/api"
+$apiUrl = $env:VENDALUME_API_URL ?? "http://localhost:8080/api"
 $body = @{
     username = "admin"
     password = "admin123"
-    email = "admin@commo.local"
+    email = "admin@vendalume.local"
     fullName = "Administrador"
     role = "SUPER_ADMIN"
 } | ConvertTo-Json
@@ -20,7 +20,7 @@ try {
     Write-Host "Usuario criado com sucesso:" -ForegroundColor Green
     Write-Host "  Usuario: admin"
     Write-Host "  Senha: admin123"
-    Write-Host "  Email: admin@commo.local"
+    Write-Host "  Email: admin@vendalume.local"
 }
 catch {
     if ($_.Exception.Response.StatusCode -eq 400) {

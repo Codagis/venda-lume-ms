@@ -8,11 +8,11 @@
 		<version>4.0.2</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.commo</groupId>
-	<artifactId>commo</artifactId>
+	<groupId>com.vendalume</groupId>
+	<artifactId>vendalume</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>commo</name>
-	<description>Projeto dedicado a construção do sistema de Commo</description>
+	<name>venda-lume-ms</name>
+	<description>Projeto dedicado a construção do sistema VendaLume</description>
 	<url/>
 	<licenses>
 		<license/>

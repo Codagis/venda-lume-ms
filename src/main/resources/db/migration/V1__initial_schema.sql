@@ -1,4 +1,4 @@
--- Commo - Schema Inicial do Banco de Dados
+-- VendaLume - Schema Inicial do Banco de Dados
 -- Criação de todas as tabelas do sistema
 
 -- Tabela: users
@@ -44,7 +44,7 @@ CREATE INDEX idx_user_created_at ON users(created_at);
 CREATE INDEX idx_user_last_login ON users(last_login_at);
 CREATE INDEX idx_user_locked_until ON users(locked_until);
 
-COMMENT ON TABLE users IS 'Usuários do sistema Commo';
+COMMENT ON TABLE users IS 'Usuários do sistema VendaLume';
 COMMENT ON COLUMN users.id IS 'Identificador único do usuário';
 COMMENT ON COLUMN users.username IS 'Nome de usuário para login';
 COMMENT ON COLUMN users.password_hash IS 'Senha hasheada com BCrypt';
@@ -125,7 +125,7 @@ CREATE INDEX idx_product_display_order ON products(display_order);
 CREATE INDEX idx_product_created_at ON products(created_at);
 CREATE INDEX idx_product_brand ON products(brand);
 
-COMMENT ON TABLE products IS 'Produtos do sistema Commo';
+COMMENT ON TABLE products IS 'Produtos do sistema VendaLume';
 COMMENT ON COLUMN products.sku IS 'Código interno do produto';
 COMMENT ON COLUMN products.unit_price IS 'Preço unitário de venda';
 COMMENT ON COLUMN products.unit_of_measure IS 'Unidade (UN, KG, LT, etc)';
@@ -185,7 +185,7 @@ CREATE INDEX idx_sale_seller ON sales(seller_id);
 CREATE INDEX idx_sale_customer ON sales(customer_id);
 CREATE INDEX idx_sale_created_at ON sales(created_at);
 
-COMMENT ON TABLE sales IS 'Vendas do sistema Commo';
+COMMENT ON TABLE sales IS 'Vendas do sistema VendaLume';
 COMMENT ON COLUMN sales.status IS 'DRAFT, OPEN, PAID, COMPLETED, CANCELLED, etc';
 COMMENT ON COLUMN sales.sale_type IS 'PDV, DELIVERY, TAKEAWAY, ONLINE, etc';
 
@@ -274,5 +274,5 @@ CREATE INDEX idx_delivery_person ON deliveries(delivery_person_id);
 CREATE INDEX idx_delivery_scheduled ON deliveries(scheduled_at);
 CREATE INDEX idx_delivery_delivered_at ON deliveries(delivered_at);
 
-COMMENT ON TABLE deliveries IS 'Entregas do sistema Commo';
+COMMENT ON TABLE deliveries IS 'Entregas do sistema VendaLume';
 COMMENT ON COLUMN deliveries.status IS 'PENDING, ASSIGNED, DELIVERED, etc';

@@ -26,7 +26,7 @@ SELECT
     gen_random_uuid(),
     'admin',
     crypt('admin123', gen_salt('bf', 12)),
-    'admin@commo.local',
+    'admin@vendalume.local',
     'Administrador',
     true,
     false,

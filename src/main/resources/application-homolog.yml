@@ -1,7 +1,7 @@
 # Ambiente: Homologação
 spring:
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/commo-db
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/vendalume-db
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     hikari:
@@ -24,7 +24,7 @@ spring:
 server:
   port: ${SERVER_PORT:8080}
 
-commo:
+vendalume:
   jwt:
     secret: ${JWT_SECRET}
     access-token-validity: ${JWT_ACCESS_VALIDITY:900}
@@ -32,5 +32,5 @@ commo:
 
 logging:
   level:
-    com.commo: INFO
+    com.vendalume: INFO
     org.springframework.web: INFO
