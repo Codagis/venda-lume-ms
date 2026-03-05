@@ -157,6 +157,26 @@ public class Sale extends BaseAuditableEntity {
     @Column(name = "payment_method", length = 30)
     private PaymentMethod paymentMethod;
 
+    @Comment("Número de parcelas (quando pagamento é cartão de crédito)")
+    @Column(name = "installments_count")
+    private Integer installmentsCount;
+
+    @Comment("Maquininha usada no pagamento (cartão); traz CNPJ da adquirente para NFC-e")
+    @Column(name = "card_machine_id", columnDefinition = "UUID")
+    private UUID cardMachineId;
+
+    @Comment("Bandeira do cartão para NFC-e: 01=Visa, 02=Master, 03=Amex, 04=Sorocred, 99=Outros")
+    @Column(name = "card_brand", length = 2)
+    private String cardBrand;
+
+    @Comment("Número da autorização da transação (1-20 caracteres) para NFC-e")
+    @Column(name = "card_authorization", length = 20)
+    private String cardAuthorization;
+
+    @Comment("Tipo de integração cartão na NFC-e: 1=TEF, 2=POS")
+    @Column(name = "card_integration_type")
+    private Integer cardIntegrationType;
+
     @Comment("Endereço completo para entrega")
     @Column(name = "delivery_address", columnDefinition = "TEXT")
     private String deliveryAddress;
@@ -212,6 +232,10 @@ public class Sale extends BaseAuditableEntity {
     @Comment("Número da NF-e ou NFC-e quando emitida")
     @Column(name = "invoice_number", length = 20)
     private String invoiceNumber;
+
+    @Comment("ID interno do documento na Nuvem Fiscal (usado para buscar o PDF da NF-e)")
+    @Column(name = "invoice_document_id", length = 100)
+    private String invoiceDocumentId;
 
     @Builder.Default
     @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -28,6 +28,12 @@ public class TenantController {
         return ResponseEntity.ok(tenantService.listAll());
     }
 
+    @GetMapping("/current")
+    @Operation(summary = "Buscar empresa do usuário logado")
+    public ResponseEntity<TenantResponse> getCurrentTenant() {
+        return ResponseEntity.ok(tenantService.getCurrentUserTenant());
+    }
+
     @GetMapping("/{id}")
     @Operation(summary = "Buscar empresa por ID")
     public ResponseEntity<TenantResponse> findById(@PathVariable UUID id) {

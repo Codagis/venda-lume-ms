@@ -41,6 +41,7 @@ public class ProductResponse {
     private UnitOfMeasure unitOfMeasure;
     private Boolean sellByWeight;
     private Boolean trackStock;
+    private Boolean deductStockOnSale;
     private BigDecimal stockQuantity;
     private BigDecimal minStock;
     private Boolean allowNegativeStock;
@@ -66,6 +67,9 @@ public class ProductResponse {
     private Boolean availableForDelivery;
     private Boolean featured;
     private Boolean isComposite;
+    private Boolean emitsNfce;
+    private Boolean emitsNfe;
+    private Boolean emitsComprovanteSimples;
     private Integer displayOrder;
     private String imageUrl;
     private String imageUrls;

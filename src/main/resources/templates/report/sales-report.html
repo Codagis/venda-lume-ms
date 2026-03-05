@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de Vendas</title>
+    <style>
+        @page { size: A4; margin: 20mm; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+            font-size: 8pt;
+            color: #333;
+            line-height: 1.35;
+            padding: 14px;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #1a365d;
+            margin-bottom: 14px;
+        }
+        .header-left { display: flex; align-items: center; gap: 16px; }
+        .logo {
+            width: 80px;
+            height: 80px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .logo-placeholder {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            color: #64748b;
+            font-weight: 600;
+        }
+        .empresa-info h1 {
+            font-size: 14pt;
+            color: #1a365d;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+        .empresa-info .subtitle {
+            font-size: 9pt;
+            color: #64748b;
+            margin-top: 2px;
+        }
+        .report-title {
+            text-align: right;
+            font-size: 11pt;
+            color: #1a365d;
+            font-weight: 600;
+        }
+        .report-title .date {
+            font-size: 8pt;
+            color: #64748b;
+            font-weight: 400;
+            margin-top: 2px;
+        }
+        .summary-box {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 10px 14px;
+            margin-bottom: 12px;
+        }
+        .summary-box h2 {
+            font-size: 9pt;
+            color: #475569;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .summary-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 24px;
+        }
+        .segment-table {
+            width: 100%;
+            font-size: 8pt;
+            border-collapse: collapse;
+            margin-top: 6px;
+        }
+        .segment-table th, .segment-table td {
+            padding: 4px 8px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .segment-table th { color: #64748b; font-weight: 600; }
+        .segment-table .num { text-align: right; }
+        .segment-table .valor { text-align: right; font-weight: 600; }
+        .segment-section { margin-bottom: 14px; }
+        .segment-section h3 { font-size: 9pt; color: #475569; margin-bottom: 6px; }
+        .summary-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .summary-item .label { font-size: 8pt; color: #64748b; }
+        .summary-item .value { font-size: 9pt; font-weight: 700; color: #1e293b; }
+        .summary-item.highlight .value { color: #1a365d; font-size: 10pt; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 7pt;
+        }
+        thead th {
+            background: #1a365d;
+            color: #fff;
+            font-weight: 600;
+            text-align: left;
+            padding: 6px 6px;
+        }
+        thead th:first-child { border-radius: 6px 0 0 0; }
+        thead th:last-child { border-radius: 0 6px 0 0; }
+        tbody td {
+            padding: 5px 6px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        tbody tr:nth-child(even) { background: #f8fafc; }
+        tbody tr:hover { background: #f1f5f9; }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+        .footer {
+            margin-top: 32px;
+            padding-top: 16px;
+            border-top: 1px solid #e2e8f0;
+            font-size: 8pt;
+            color: #94a3b8;
+            text-align: center;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 30px 20px;
+            color: #64748b;
+            font-size: 9pt;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="header-left">
+        <div th:if="${logoUrl != null}" class="logo">
+            <img th:src="${logoUrl}" alt="Logo" />
+        </div>
+        <div th:if="${logoUrl == null}" class="logo-placeholder">LOGO</div>
+        <div class="empresa-info">
+            <h1 th:text="${nomeEmpresa}">Empresa</h1>
+            <div class="subtitle" th:text="${periodo}">Período</div>
+        </div>
+    </div>
+    <div class="report-title">
+        Relatório de Vendas
+        <div class="date" th:text="'Gerado em ' + ${dataGeracao}">Gerado em</div>
+    </div>
+</div>
+
+<div class="summary-box">
+    <h2>Resumo do Período</h2>
+    <div class="summary-grid">
+        <div class="summary-item highlight">
+            <span class="label">Total de Vendas</span>
+            <span class="value" th:text="${totalVendas}">0</span>
+        </div>
+        <div class="summary-item highlight">
+            <span class="label">Valor Total (R$)</span>
+            <span class="value" th:text="${valorTotal}">0,00</span>
+        </div>
+        <div class="summary-item">
+            <span class="label">Subtotal</span>
+            <span class="value" th:text="${subtotalGeral}">0,00</span>
+        </div>
+        <div class="summary-item">
+            <span class="label">Descontos</span>
+            <span class="value" th:text="${descontos}">0,00</span>
+        </div>
+        <div class="summary-item">
+            <span class="label">Taxas / Impostos</span>
+            <span class="value" th:text="${taxas}">0,00</span>
+        </div>
+        <div class="summary-item">
+            <span class="label">Fretes / Entregas</span>
+            <span class="value" th:text="${fretes}">0,00</span>
+        </div>
+    </div>
+
+    <div class="segment-section" th:if="${porTipo != null}">
+        <h3>Por tipo de venda</h3>
+        <table class="segment-table">
+            <thead>
+                <tr><th>Tipo</th><th class="num">Qtd</th><th class="valor">Valor (R$)</th></tr>
+            </thead>
+            <tbody>
+                <tr th:each="item : ${porTipo}" th:if="${item.count > 0}">
+                    <td th:text="${item.label}">—</td>
+                    <td class="num" th:text="${item.count}">0</td>
+                    <td class="valor" th:text="${item.valorFormatado}">0,00</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="segment-section" th:if="${porSegmento != null}">
+        <h3>Por forma de pagamento (segmento)</h3>
+        <table class="segment-table">
+            <thead>
+                <tr><th>Forma de pagamento</th><th class="num">Qtd</th><th class="valor">Valor (R$)</th></tr>
+            </thead>
+            <tbody>
+                <tr th:each="item : ${porSegmento}" th:if="${item.count > 0}">
+                    <td th:text="${item.label}">—</td>
+                    <td class="num" th:text="${item.count}">0</td>
+                    <td class="valor" th:text="${item.valorFormatado}">0,00</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div th:if="${!rows.isEmpty()}">
+    <table>
+        <thead>
+            <tr>
+                <th>Número</th>
+                <th>Data</th>
+                <th>Cliente</th>
+                <th>Status</th>
+                <th>Tipo</th>
+                <th>Pagamento</th>
+                <th class="text-right">Subtotal</th>
+                <th class="text-right">Desconto</th>
+                <th class="text-right">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="row : ${rows}">
+                <td th:text="${row.numero}">—</td>
+                <td th:text="${row.data}">—</td>
+                <td th:text="${row.cliente}">—</td>
+                <td th:text="${row.status}">—</td>
+                <td th:text="${row.tipo}">—</td>
+                <td th:text="${row.pagamento}">—</td>
+                <td class="text-right" th:text="${row.subtotal}">—</td>
+                <td class="text-right" th:text="${row.desconto}">—</td>
+                <td class="text-right" th:text="${row.total}">—</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div th:if="${rows.isEmpty()}" class="empty-state">
+    Nenhuma venda encontrada para o período e filtros selecionados.
+</div>
+
+<div class="footer">
+    Documento gerado automaticamente pelo VendaLume · <span th:text="${dataGeracao}">—</span>
+</div>
+</body>
+</html>

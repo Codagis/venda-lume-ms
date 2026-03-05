@@ -73,6 +73,9 @@ public class ProductUpdateRequest {
     @Builder.Default
     private Boolean trackStock = false;
 
+    @Builder.Default
+    private Boolean deductStockOnSale = true;
+
     @DecimalMin(value = "0", message = "Quantidade em estoque não pode ser negativa")
     @Digits(integer = 15, fraction = 4)
     private BigDecimal stockQuantity;
@@ -153,6 +156,15 @@ public class ProductUpdateRequest {
 
     @Builder.Default
     private Boolean isComposite = false;
+
+    @Builder.Default
+    private Boolean emitsNfce = true;
+
+    @Builder.Default
+    private Boolean emitsNfe = false;
+
+    @Builder.Default
+    private Boolean emitsComprovanteSimples = true;
 
     @Min(0)
     private Integer displayOrder;

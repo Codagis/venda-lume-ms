@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprovante de Reserva</title>
+    <style>
+        @page { size: 80mm 200mm; margin: 5mm; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Courier New", monospace;
+        }
+        body {
+            background: #ffffff;
+            margin: 0;
+            padding: 0;
+            font-family: "Courier New", monospace;
+        }
+        .receipt {
+            background: #ffffff;
+            width: 70mm;
+            max-width: 100%;
+            padding: 12px 14px;
+            color: #000;
+            font-size: 10px;
+            line-height: 1.5;
+        }
+        .center {
+            text-align: center;
+        }
+        .divider {
+            border-top: 1px dashed #000;
+            margin: 10px 0;
+        }
+        .label {
+            color: #444;
+            font-size: 9px;
+        }
+        .value {
+            font-weight: 600;
+        }
+        .row {
+            margin: 6px 0;
+        }
+        .footer {
+            margin-top: 14px;
+            font-size: 9px;
+            text-align: center;
+        }
+        .numero-reserva {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin: 4px 0;
+        }
+        .titulo {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        .logo {
+            margin: 0 auto 8px;
+            display: block;
+            text-align: center;
+            min-height: 1px;
+        }
+        .logo img {
+            max-width: 56px;
+            max-height: 56px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            display: block;
+            margin: 0 auto;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+<div class="receipt">
+    <div class="center">
+        <div th:if="${logoUrl != null}" class="logo">
+            <img th:src="${logoUrl}" alt="Logo" />
+        </div>
+        <div th:if="${logoUrl == null}" class="logo" style="width:56px;height:56px;background:#eee;line-height:56px;color:#999;font-size:9px;margin-left:auto;margin-right:auto;">LOGO</div>
+        <div th:text="${nomeEstabelecimento}">Estabelecimento</div>
+        <div class="divider"></div>
+        <div class="titulo">Comprovante de Reserva</div>
+        <div class="numero-reserva">Nº <span th:text="${numeroReserva}">—</span></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="row"><span class="label">Cliente:</span> <span class="value" th:text="${nomeCliente}">—</span></div>
+    <div class="row"><span class="label">Telefone:</span> <span th:text="${telefone}">—</span></div>
+    <div class="row"><span class="label">E-mail:</span> <span th:text="${email}">—</span></div>
+
+    <div class="divider"></div>
+
+    <div class="row"><span class="label">Mesa:</span> <span class="value" th:text="${mesa}">—</span></div>
+    <div class="row"><span class="label">Data e hora:</span> <span class="value" th:text="${dataHora}">—</span></div>
+    <div class="row"><span class="label">Pessoas:</span> <span th:text="${numeroPessoas}">0</span></div>
+    <div class="row"><span class="label">Status:</span> <span th:text="${statusDesc}">—</span></div>
+
+    <div th:if="${temObservacoes}" class="divider"></div>
+    <div th:if="${temObservacoes}" class="row">
+        <span class="label">Obs.:</span> <span th:text="${observacoes}">—</span>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="footer">
+        Apresente este comprovante no dia.<br>
+        Cancelamentos: entre em contato.
+    </div>
+</div>
+</body>
+</html>

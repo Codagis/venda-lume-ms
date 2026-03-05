@@ -4,6 +4,7 @@ import com.vendalume.vendalume.domain.entity.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -21,7 +22,7 @@ import java.util.UUID;
  * @since 2025-02-16
  */
 @Repository
-public interface ProductRepository extends JpaRepository<Product, UUID> {
+public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpecificationExecutor<Product> {
 
     @Query(value = "SELECT * FROM products WHERE id = CAST(:id AS UUID) AND tenant_id = CAST(:tenantId AS UUID) LIMIT 1", nativeQuery = true)
     Optional<Product> findByIdAndTenantId(@Param("id") UUID id, @Param("tenantId") UUID tenantId);
@@ -83,45 +84,8 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     @Query(value = "SELECT EXISTS(SELECT 1 FROM products WHERE tenant_id = CAST(:tenantId AS UUID) AND barcode = :barcode AND id != CAST(:excludeId AS UUID))", nativeQuery = true)
     boolean existsByTenantIdAndBarcodeAndIdNot(@Param("tenantId") UUID tenantId, @Param("barcode") String barcode, @Param("excludeId") UUID excludeId);
 
-    @Query(value = """
-            SELECT * FROM products
-            WHERE tenant_id = CAST(:tenantId AS UUID)
-            AND (:active IS NULL OR active = :active)
-            AND (:categoryId IS NULL OR category_id = CAST(:categoryId AS UUID))
-            AND (:availableForSale IS NULL OR available_for_sale = :availableForSale)
-            AND (:availableForDelivery IS NULL OR available_for_delivery = :availableForDelivery)
-            AND (:featured IS NULL OR featured = :featured)
-            AND (:lowStock IS NOT TRUE OR (track_stock = true AND min_stock IS NOT NULL AND stock_quantity < min_stock))
-            AND (:search IS NULL OR :search = '' OR LOWER(name) LIKE LOWER(CONCAT('%', :search, '%'))
-                OR LOWER(sku) LIKE LOWER(CONCAT('%', :search, '%'))
-                OR LOWER(barcode) = LOWER(:search)
-                OR (brand IS NOT NULL AND LOWER(brand) LIKE LOWER(CONCAT('%', :search, '%'))))
-            """,
-            countQuery = """
-            SELECT COUNT(*) FROM products
-            WHERE tenant_id = CAST(:tenantId AS UUID)
-            AND (:active IS NULL OR active = :active)
-            AND (:categoryId IS NULL OR category_id = CAST(:categoryId AS UUID))
-            AND (:availableForSale IS NULL OR available_for_sale = :availableForSale)
-            AND (:availableForDelivery IS NULL OR available_for_delivery = :availableForDelivery)
-            AND (:featured IS NULL OR featured = :featured)
-            AND (:lowStock IS NOT TRUE OR (track_stock = true AND min_stock IS NOT NULL AND stock_quantity < min_stock))
-            AND (:search IS NULL OR :search = '' OR LOWER(name) LIKE LOWER(CONCAT('%', :search, '%'))
-                OR LOWER(sku) LIKE LOWER(CONCAT('%', :search, '%'))
-                OR LOWER(barcode) = LOWER(:search)
-                OR (brand IS NOT NULL AND LOWER(brand) LIKE LOWER(CONCAT('%', :search, '%'))))
-            """,
-            nativeQuery = true)
-    Page<Product> searchByTenant(
-            @Param("tenantId") UUID tenantId,
-            @Param("active") Boolean active,
-            @Param("categoryId") UUID categoryId,
-            @Param("availableForSale") Boolean availableForSale,
-            @Param("availableForDelivery") Boolean availableForDelivery,
-            @Param("featured") Boolean featured,
-            @Param("lowStock") Boolean lowStock,
-            @Param("search") String search,
-            Pageable pageable);
+    @Query(value = "SELECT COUNT(*) FROM products WHERE tenant_id = CAST(:tenantId AS UUID)", nativeQuery = true)
+    long countByTenantId(@Param("tenantId") UUID tenantId);
 
     @Query(value = """
             SELECT * FROM products

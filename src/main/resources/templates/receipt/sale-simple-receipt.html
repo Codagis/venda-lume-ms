@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprovante de Venda</title>
+    <style>
+        @page { size: 80mm 200mm; margin: 5mm; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Courier New", monospace;
+        }
+        body {
+            background: #ffffff;
+            margin: 0;
+            padding: 0;
+            font-family: "Courier New", monospace;
+        }
+        .receipt {
+            background: #ffffff;
+            width: 70mm;
+            max-width: 100%;
+            padding: 15px 20px;
+            color: #000;
+            font-size: 11px;
+            line-height: 1.6;
+        }
+        .center {
+            text-align: center;
+        }
+        .divider {
+            border-top: 1px dashed #000;
+            margin: 12px 0;
+        }
+        .small-gap {
+            margin-top: 10px;
+        }
+        .footer {
+            margin-top: 15px;
+            font-size: 10px;
+        }
+        .logo {
+            width: 60px;
+            height: 60px;
+            background: #e0e0e0;
+            display: block;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10px;
+            margin: 10px 0;
+        }
+        .items-table th,
+        .items-table td {
+            text-align: left;
+            padding: 4px 6px;
+            border-bottom: 1px solid #ddd;
+        }
+        .items-table td:last-child,
+        .items-table th:last-child {
+            text-align: right;
+        }
+        .row-label {
+            display: inline-block;
+            width: 140px;
+        }
+        .no-wrap {
+            white-space: nowrap;
+        }
+        .non-fiscal-notice {
+            margin-top: 12px;
+            font-size: 8px;
+            color: #888;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="receipt">
+
+    <div th:if="${logoUrl != null}">
+        <img th:src="${logoUrl}" alt="Logo" class="logo" />
+    </div>
+    <div th:if="${logoUrl == null}" class="logo" style="text-align:center;line-height:60px;color:#999;">LOGO</div>
+
+    <div th:text="${nomeLoja}">EMPRESA</div>
+    <div th:text="|${dataHora}  -  PDV  -  VENDA|">03/03/2026 - 14:27:55</div>
+    <div th:text="${numeroVenda}">V000011</div>
+
+    <div class="divider"></div>
+
+    <div class="center"><strong>COMPROVANTE DE VENDA</strong></div>
+
+    <div class="divider"></div>
+
+    <div>CLIENTE: <span class="no-wrap" th:text="${nomeCliente}">—</span></div>
+    <div>VENDEDOR: <span class="no-wrap" th:text="${nomeVendedor}">—</span></div>
+    <div>FORMA PAG.: <span class="no-wrap" th:text="${descricaoFormaPagamento}">—</span></div>
+
+    <div class="divider"></div>
+
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th>QTD</th>
+                <th>DESCRIÇÃO</th>
+                <th>VALOR</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="item : ${listaItensVenda}">
+                <td th:text="${item.quantidadeProduto}">1</td>
+                <td>
+                    <span th:text="${item.descricaoProduto}">Produto</span>
+                    <small th:if="${item.observacaoItem != null}" th:text="${' - ' + item.observacaoItem}"></small>
+                </td>
+                <td th:text="${'R$ ' + #numbers.formatDecimal(item.valorTotalProduto,1,'POINT',2,'COMMA')}">R$ 0,00</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="small-gap"></div>
+
+    <div>Data da venda <span class="no-wrap" th:text="${dataVenda}">03/03/2026</span></div>
+    <div th:if="${valorDesconto != null and valorDesconto != '0,00'}">Desconto&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;R$ <span th:text="${valorDesconto}">0,00</span></div>
+    <div th:if="${valorFrete != null and valorFrete != '0,00'}">Frete&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;R$ <span th:text="${valorFrete}">0,00</span></div>
+    <div><strong>Valor Total</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>R$ <span th:text="${valorTotalFinal}">0,00</span></strong></div>
+
+    <div class="divider"></div>
+
+    <div>DOCUMENTO: <span th:text="${numeroVenda}">—</span></div>
+    <div th:if="${detalheParcelas != null}">Parcelas: <span th:text="${detalheParcelas}">—</span></div>
+
+    <div class="divider"></div>
+
+    <div class="footer" th:if="${observacaoVenda != null}">
+        <strong>OBS.:</strong> <span th:text="${observacaoVenda}"></span>
+    </div>
+
+    <div class="footer">
+        Volte sempre!
+    </div>
+
+    <div class="non-fiscal-notice">
+        Esse é um documento não fiscal, apenas comprovante
+    </div>
+
+</div>
+
+</body>
+</html>

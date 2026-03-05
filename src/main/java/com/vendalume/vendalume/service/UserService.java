@@ -50,6 +50,10 @@ public class UserService {
 
     @Transactional
     public UserResponse create(RegisterRequest request) {
+        var current = com.vendalume.vendalume.security.SecurityUtils.requireCurrentUser();
+        if (!Boolean.TRUE.equals(current.getIsRoot())) {
+            request.setTenantId(current.getTenantId());
+        }
         return authService.register(request);
     }
 

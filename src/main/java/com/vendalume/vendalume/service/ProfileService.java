@@ -61,9 +61,10 @@ public class ProfileService {
     @Transactional
     public ProfileResponse create(ProfileRequest request) {
         UUID tenantId = resolveTenantId(request.getTenantId());
-        boolean nameExists = tenantId == null
-                ? profileRepository.existsByTenantIdIsNullAndName(request.getName().trim())
-                : profileRepository.existsByTenantIdAndName(tenantId, request.getName().trim());
+        if (tenantId == null) {
+            throw new IllegalArgumentException("Perfil deve pertencer a uma empresa.");
+        }
+        boolean nameExists = profileRepository.existsByTenantIdAndName(tenantId, request.getName().trim());
         if (nameExists) {
             throw new IllegalArgumentException("Já existe um perfil com este nome para esta empresa.");
         }
@@ -86,9 +87,10 @@ public class ProfileService {
             throw new ResourceNotFoundException("Perfil", id);
         }
         UUID tenantId = resolveTenantId(request.getTenantId());
-        boolean nameExists = tenantId == null
-                ? profileRepository.existsByTenantIdIsNullAndName(request.getName().trim())
-                : profileRepository.existsByTenantIdAndNameAndIdNot(tenantId, request.getName().trim(), id);
+        if (tenantId == null) {
+            throw new IllegalArgumentException("Perfil deve pertencer a uma empresa.");
+        }
+        boolean nameExists = profileRepository.existsByTenantIdAndNameAndIdNot(tenantId, request.getName().trim(), id);
         if (nameExists) {
             throw new IllegalArgumentException("Já existe um perfil com este nome para esta empresa.");
         }

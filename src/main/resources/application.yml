@@ -46,8 +46,24 @@ springdoc:
     filter: true
     try-it-out-enabled: true
 
+app:
+  version: ${APP_VERSION:01.00.00}
+
 vendalume:
+  fiscal-simplify:
+    base-url: ${FISCAL_SIMPLIFY_BASE_URL:http://localhost:8081}
+    enabled: ${FISCAL_SIMPLIFY_ENABLED:true}
   jwt:
     secret: ${JWT_SECRET:}
     access-token-validity: ${JWT_ACCESS_VALIDITY:900}
     refresh-token-validity: ${JWT_REFRESH_VALIDITY:604800}
+  maps:
+    api-key: ${GOOGLE_MAPS_API_KEY:}
+  gcs:
+    enabled: ${GCS_ENABLED:false}
+    bucket-name: ${GCS_BUCKET_NAME:}
+    project-id: ${GCP_PROJECT_ID:}
+    # Opção 1: JSON da conta de serviço em uma única string (ex.: variável GCS_CREDENTIALS_JSON)
+    credentials-json: ${GCS_CREDENTIALS_JSON:}
+    # Opção 2: Caminho do arquivo JSON (ignorado se credentials-json estiver preenchido)
+    credentials-path: ${GCS_CREDENTIALS_PATH:}

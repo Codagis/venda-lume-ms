@@ -1,5 +1,6 @@
 package com.vendalume.vendalume.api.dto.product;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,6 +22,10 @@ import java.util.UUID;
 @AllArgsConstructor
 @Schema(description = "Filtros para busca de produtos")
 public class ProductFilterRequest {
+
+    @JsonProperty("tenantId")
+    @Schema(description = "ID da empresa (tenant). Apenas root pode filtrar por outra empresa.")
+    private UUID tenantId;
 
     @Schema(description = "Busca por nome, SKU, código de barras ou marca")
     private String search;

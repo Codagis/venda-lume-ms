@@ -45,6 +45,7 @@ public class ModuleService {
 
         Set<String> permissionCodes = getPermissionCodesForUser(user);
         return moduleRepository.findByActiveTrueOrderByDisplayOrderAsc().stream()
+                .filter(m -> !"MODULES".equals(m.getCode())) // Módulos: apenas root
                 .filter(m -> permissionCodes.contains(m.getViewPermissionCode()))
                 .map(this::toResponse)
                 .toList();

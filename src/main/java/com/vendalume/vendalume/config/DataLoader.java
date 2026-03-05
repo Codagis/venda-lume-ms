@@ -81,6 +81,18 @@ public class DataLoader {
                     permissionRepository.findByCode("MODULE_VIEW").ifPresent(perms::add);
                     permissionRepository.findByCode("USER_VIEW").ifPresent(perms::add);
                     permissionRepository.findByCode("PROFILE_VIEW").ifPresent(perms::add);
+                    permissionRepository.findByCode("SALE_VIEW").ifPresent(perms::add);
+                    permissionRepository.findByCode("SALE_CREATE").ifPresent(perms::add);
+                    permissionRepository.findByCode("STOCK_VIEW").ifPresent(perms::add);
+                    permissionRepository.findByCode("STOCK_MANAGE").ifPresent(perms::add);
+                    permissionRepository.findByCode("CUSTOMER_VIEW").ifPresent(perms::add);
+                    permissionRepository.findByCode("CUSTOMER_CREATE").ifPresent(perms::add);
+                    permissionRepository.findByCode("SUPPLIER_VIEW").ifPresent(perms::add);
+                    permissionRepository.findByCode("SUPPLIER_CREATE").ifPresent(perms::add);
+                    permissionRepository.findByCode("COST_CONTROL_VIEW").ifPresent(perms::add);
+                    permissionRepository.findByCode("COST_CONTROL_MANAGE").ifPresent(perms::add);
+                    permissionRepository.findByCode("TABLE_VIEW").ifPresent(perms::add);
+                    permissionRepository.findByCode("TABLE_MANAGE").ifPresent(perms::add);
                     com.vendalume.vendalume.domain.entity.Profile p = new com.vendalume.vendalume.domain.entity.Profile();
                     p.setTenantId(codagis.getId());
                     p.setName(PERFIL_PADRAO);
@@ -125,6 +137,23 @@ public class DataLoader {
         createPermissionIfNotExists("SALE_CANCEL", "Cancelar vendas", "Cancelar vendas", "SALES");
         createPermissionIfNotExists("DELIVERY_VIEW", "Visualizar entregas", "Ver entregas", "DELIVERY");
         createPermissionIfNotExists("DELIVERY_MANAGE", "Gerenciar entregas", "Alterar status e atribuir entregas", "DELIVERY");
+        createPermissionIfNotExists("MY_DELIVERIES_VIEW", "Minhas entregas", "Tela de entregas do entregador com registro de comprovante", "MY_DELIVERIES");
+        createPermissionIfNotExists("CUSTOMER_VIEW", "Visualizar clientes", "Ver listagem e detalhes de clientes", "CUSTOMERS");
+        createPermissionIfNotExists("CUSTOMER_CREATE", "Criar clientes", "Cadastrar novos clientes", "CUSTOMERS");
+        createPermissionIfNotExists("CUSTOMER_UPDATE", "Editar clientes", "Alterar dados de clientes", "CUSTOMERS");
+        createPermissionIfNotExists("CUSTOMER_DELETE", "Excluir clientes", "Remover clientes do cadastro", "CUSTOMERS");
+        createPermissionIfNotExists("STOCK_VIEW", "Visualizar estoque", "Ver gestão de estoque e movimentações", "STOCK");
+        createPermissionIfNotExists("STOCK_MANAGE", "Gerenciar estoque", "Registrar entradas, saídas e ajustes", "STOCK");
+        createPermissionIfNotExists("SUPPLIER_VIEW", "Visualizar fornecedores", "Ver listagem e detalhes de fornecedores", "SUPPLIERS");
+        createPermissionIfNotExists("SUPPLIER_CREATE", "Criar fornecedores", "Cadastrar novos fornecedores", "SUPPLIERS");
+        createPermissionIfNotExists("SUPPLIER_UPDATE", "Editar fornecedores", "Alterar dados de fornecedores", "SUPPLIERS");
+        createPermissionIfNotExists("SUPPLIER_DELETE", "Excluir fornecedores", "Remover fornecedores do cadastro", "SUPPLIERS");
+        createPermissionIfNotExists("COST_CONTROL_VIEW", "Visualizar controle de custos", "Ver contas a pagar e a receber", "COST_CONTROL");
+        createPermissionIfNotExists("COST_CONTROL_MANAGE", "Gerenciar controle de custos", "Criar, editar e registrar pagamentos/recebimentos", "COST_CONTROL");
+        createPermissionIfNotExists("TABLE_VIEW", "Visualizar mesas", "Ver seções, mesas e reservas", "RESTAURANT_TABLES");
+        createPermissionIfNotExists("TABLE_MANAGE", "Gerenciar mesas", "Criar, editar e excluir seções, mesas e reservas", "RESTAURANT_TABLES");
+        createPermissionIfNotExists("REGISTER_VIEW", "Visualizar pontos de venda", "Ver caixas e operadores", "REGISTERS");
+        createPermissionIfNotExists("REGISTER_MANAGE", "Gerenciar pontos de venda", "Criar, editar caixas e atribuir operadores", "REGISTERS");
     }
 
     private void createPermissionIfNotExists(String code, String name, String description, String module) {
@@ -141,6 +170,18 @@ public class DataLoader {
     private void ensureModulesExist() {
         createModule("DASHBOARD", "Dashboard", "Tela inicial", "DashboardOutlined", "/", "Dashboard", 0, "DASHBOARD_VIEW");
         createModule("PRODUCTS", "Produtos", "Cadastro de produtos", "ShoppingOutlined", "/products", "Products", 10, "PRODUCT_VIEW");
+        createModule("CUSTOMERS", "Clientes", "Cadastro de clientes", "UserOutlined", "/customers", "Customers", 12, "CUSTOMER_VIEW");
+        createModule("SALES", "Registrar vendas", "PDV e registro de vendas", "ShoppingCartOutlined", "/sales", "Sales", 15, "SALE_VIEW");
+        createModule("SALES_CONSULT", "Consultar vendas", "Consulta detalhada e totalizador de vendas", "FileSearchOutlined", "/sales-consult", "SalesConsult", 16, "SALE_VIEW");
+        createModule("STOCK", "Estoque", "Controle de estoque e movimentações", "InboxOutlined", "/stock", "Stock", 11, "STOCK_VIEW");
+        createModule("SUPPLIERS", "Fornecedores", "Cadastro de fornecedores", "ShopOutlined", "/suppliers", "Suppliers", 13, "SUPPLIER_VIEW");
+        createModule("COST_CONTROL", "Controle de Custos", "Contas a pagar e contas a receber", "DollarOutlined", "/cost-control", "CostControl", 14, "COST_CONTROL_VIEW");
+        createModule("DELIVERY", "Entregas", "Gestão e acompanhamento de entregas", "CarOutlined", "/delivery", "Deliveries", 17, "DELIVERY_VIEW");
+        createModule("DELIVERY_PERSONS", "Entregadores", "Cadastro de entregadores", "UserOutlined", "/delivery-persons", "DeliveryPersons", 18, "DELIVERY_VIEW");
+        createModule("MY_DELIVERIES", "Minhas Entregas", "Tela do entregador: listar entregas e registrar comprovante com foto", "CarOutlined", "/my-deliveries", "MyDeliveries", 18, "MY_DELIVERIES_VIEW");
+        createModule("REGISTERS", "Pontos de Venda", "Cadastro de caixas (PDV) e equipamentos", "DesktopOutlined", "/registers", "Registers", 18, "REGISTER_VIEW");
+        createModule("CASHIERS", "Operadores de Caixa", "Usuários que operam os caixas (perfil Caixa/Operador)", "UserOutlined", "/cashiers", "Cashiers", 18, "REGISTER_VIEW");
+        createModule("RESTAURANT_TABLES", "Mesas do Restaurante", "Seções, mesas e reservas", "CoffeeOutlined", "/restaurant-tables", "RestaurantTables", 19, "TABLE_VIEW");
         createModule("MODULES", "Módulos", "Cadastro de módulos do sistema", "AppstoreOutlined", "/modules", "Modules", 20, "MODULE_VIEW");
         createModule("USERS", "Usuários", "Cadastro de usuários", "TeamOutlined", "/users", "Users", 30, "USER_VIEW");
         createModule("SETTINGS", "Configurações", "Empresas, perfis e permissões", "SettingOutlined", "/settings", "Settings", 100, "PROFILE_VIEW");

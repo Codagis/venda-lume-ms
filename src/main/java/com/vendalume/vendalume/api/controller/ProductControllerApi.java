@@ -57,10 +57,12 @@ public interface ProductControllerApi {
     @GetMapping("/barcode/{barcode}")
     ResponseEntity<ProductResponse> findByBarcode(@PathVariable String barcode);
 
-    @Operation(summary = "Buscar com filtros", description = "Lista produtos paginados com filtros avançados")
+    @Operation(summary = "Buscar com filtros", description = "Lista produtos paginados com filtros avançados. Root pode passar tenantId (query ou body) para filtrar por empresa.")
     @ApiResponse(responseCode = "200", description = "Lista de produtos", content = @Content(schema = @Schema(implementation = PageResponse.class)))
     @PostMapping("/search")
-    ResponseEntity<PageResponse<ProductResponse>> search(@Valid @RequestBody ProductFilterRequest filter);
+    ResponseEntity<PageResponse<ProductResponse>> search(
+            @RequestParam(required = false) UUID tenantId,
+            @Valid @RequestBody ProductFilterRequest filter);
 
     @Operation(summary = "Listar ativos", description = "Lista todos os produtos ativos do tenant")
     @ApiResponse(responseCode = "200", description = "Lista de produtos ativos")

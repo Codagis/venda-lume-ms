@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Cupom Fiscal</title>
+
+    <style>
+        @page {
+            size: 100mm 297mm;
+            margin: 5mm;
+        }
+
+        body {
+            font-family: "Courier New", monospace;
+            width: 100%;
+            max-width: 90mm;
+            margin: 0 auto;
+            font-size: 11px;
+            color: #000;
+            word-wrap: break-word;
+        }
+
+        .center { text-align: center; }
+        .right { text-align: right; }
+        .bold { font-weight: bold; }
+
+        .hash-md5 {
+            word-break: break-all;
+            font-size: 9px;
+        }
+
+        .chave-nfce {
+            word-break: break-all;
+            font-size: 9px;
+        }
+
+        .linha-separadora {
+            border-top: 1px dashed #000;
+            margin: 5px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 2px 0;
+            font-size: 11px;
+        }
+
+        .col-qtde { width: 35px; }
+        .col-unit { width: 60px; }
+        .col-total { width: 70px; }
+    </style>
+</head>
+
+<body>
+
+<!-- ========================= -->
+<!-- DADOS DA EMPRESA -->
+<!-- ========================= -->
+<div class="center bold" th:text="${razaoSocialEmpresa}">
+    EMPRESA MODELO LTDA
+</div>
+
+<div class="center" th:text="${nomeFantasiaEmpresa}">
+    NOME FANTASIA
+</div>
+
+<div class="center" th:text="${enderecoCompletoEmpresa}">
+    Rua Exemplo, 100 - Centro - Cidade/UF
+</div>
+
+<div class="center">
+    CNPJ: <span th:text="${cnpjEmpresa}">00.000.000/0001-00</span>
+</div>
+
+<div class="center">
+    IE: <span th:text="${inscricaoEstadualEmpresa}">000000000</span>
+</div>
+
+<div class="center">
+    IM: <span th:text="${inscricaoMunicipalEmpresa}">ISENTO</span>
+</div>
+
+<div class="linha-separadora"></div>
+
+<!-- ========================= -->
+<!-- DADOS DO CUPOM -->
+<!-- ========================= -->
+<div>
+    <span th:text="${dataEmissaoFormatada}">01/01/2026</span>
+    <span th:text="${horaEmissaoFormatada}">14:35:22</span>
+</div>
+
+<div>
+    CCF: <span th:text="${contadorCupomFiscal}">000123</span>
+    COO: <span th:text="${contadorOrdemOperacao}">000456</span>
+</div>
+
+<div class="linha-separadora"></div>
+
+<!-- ========================= -->
+<!-- DADOS DO CONSUMIDOR -->
+<!-- ========================= -->
+<div th:if="${cpfOuCnpjConsumidor != null}">
+    CPF/CNPJ: <span th:text="${cpfOuCnpjConsumidor}">000.000.000-00</span>
+</div>
+
+<div th:if="${nomeConsumidor != null}">
+    Nome: <span th:text="${nomeConsumidor}">Cliente Exemplo</span>
+</div>
+
+<div th:if="${enderecoConsumidor != null}">
+    End: <span th:text="${enderecoConsumidor}">Rua Cliente, 123</span>
+</div>
+
+<div class="linha-separadora"></div>
+
+<div class="center bold">CUPOM FISCAL</div>
+
+<div class="linha-separadora"></div>
+
+<!-- ========================= -->
+<!-- CABEÇALHO ITENS -->
+<!-- ========================= -->
+<table>
+    <thead>
+        <tr>
+            <th>ITEM</th>
+            <th>DESC</th>
+            <th class="right col-qtde">QTD</th>
+            <th class="right col-unit">VL UN</th>
+            <th class="right col-total">VL TOT</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr th:each="itemVenda, iterStat : ${listaItensVenda}">
+            <td th:text="${iterStat.index + 1}">1</td>
+
+            <td>
+                <div th:text="${itemVenda.descricaoProduto}">
+                    PRODUTO EXEMPLO
+                </div>
+
+                <div>
+                    Cód:
+                    <span th:text="${itemVenda.codigoProduto}">0001</span>
+                </div>
+            </td>
+
+            <td class="right"
+                th:text="${itemVenda.quantidadeProduto}">
+                1
+            </td>
+
+            <td class="right"
+                th:text="${#numbers.formatDecimal(itemVenda.valorUnitarioProduto, 1, 'POINT', 2, 'COMMA')}">
+                10,00
+            </td>
+
+            <td class="right"
+                th:text="${#numbers.formatDecimal(itemVenda.valorTotalProduto, 1, 'POINT', 2, 'COMMA')}">
+                10,00
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="linha-separadora"></div>
+
+<!-- ========================= -->
+<!-- TOTAIS -->
+<!-- ========================= -->
+<div>
+    Subtotal R$:
+    <span class="right"
+          th:text="${#numbers.formatDecimal(valorSubtotalVenda, 1, 'POINT', 2, 'COMMA')}">
+        100,00
+    </span>
+</div>
+
+<div th:if="${valorDescontoVenda != null and valorDescontoVenda > 0}">
+    Desconto R$:
+    <span class="right"
+          th:text="${#numbers.formatDecimal(valorDescontoVenda, 1, 'POINT', 2, 'COMMA')}">
+        5,00
+    </span>
+</div>
+
+<div class="bold">
+    TOTAL R$:
+    <span class="right"
+          th:text="${#numbers.formatDecimal(valorTotalFinalVenda, 1, 'POINT', 2, 'COMMA')}">
+        95,00
+    </span>
+</div>
+
+<div class="linha-separadora"></div>
+
+<!-- ========================= -->
+<!-- PAGAMENTO -->
+<!-- ========================= -->
+<div>
+    Forma Pagto:
+    <span th:text="${descricaoFormaPagamento}">
+        Dinheiro
+    </span>
+</div>
+
+<div th:if="${quantidadeParcelas != null and quantidadeParcelas > 0 and valorParcela != null}">
+    Parcelas:
+    <span th:text="|${quantidadeParcelas}x de R$ ${#numbers.formatDecimal(valorParcela, 1, 'POINT', 2, 'COMMA')}|">
+        3x de R$ 33,33
+    </span>
+</div>
+
+<div th:if="${valorRecebidoPagamento != null}">
+    Valor Recebido:
+    <span th:text="${valorRecebidoPagamento}">100,00</span>
+</div>
+
+<div th:if="${valorTrocoPagamento != null and valorTrocoPagamento > 0}">
+    Troco:
+    <span th:text="${#numbers.formatDecimal(valorTrocoPagamento, 1, 'POINT', 2, 'COMMA')}">5,00</span>
+</div>
+
+<div class="linha-separadora"></div>
+
+<!-- ========================= -->
+<!-- DADOS FISCAIS AVANÇADOS -->
+<!-- ========================= -->
+<div>
+    MD5:
+    <span class="hash-md5" th:text="${hashMd5CupomFiscal}">
+        00000000000000000000000000000000
+    </span>
+</div>
+
+<div>
+    Nº Série ECF:
+    <span th:text="${numeroSerieEquipamentoFiscal}">
+        123456
+    </span>
+</div>
+
+<div>
+    ECF:
+    <span th:text="${modeloEquipamentoFiscal}">
+        MP-2100 TH FI
+    </span>
+</div>
+
+<div>
+    Versão Software:
+    <span th:text="${versaoSoftwareAplicativoFiscal}">
+        01.00.00
+    </span>
+</div>
+
+<div class="linha-separadora"></div>
+
+<div class="center">
+    Consulte pela Chave:
+</div>
+
+<div class="center chave-nfce"
+     th:text="${chaveAcessoNfce}">
+    00000000000000000000000000000000000000000000
+</div>
+
+<div class="linha-separadora"></div>
+
+<div class="center">
+    Obrigado pela preferência!
+</div>
+
+</body>
+</html>

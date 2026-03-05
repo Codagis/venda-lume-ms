@@ -7,9 +7,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.vendalume.vendalume.domain.enums.UserRole;
+
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -51,6 +54,10 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     boolean existsByTenantIdAndUsernameIgnoreCase(@Param("tenantId") UUID tenantId, @Param("username") String username);
 
     List<User> findByTenantIdOrderByUsernameAsc(UUID tenantId);
+
+    List<User> findByTenantIdAndRoleAndActiveTrueOrderByFullNameAsc(UUID tenantId, UserRole role);
+
+    List<User> findByTenantIdAndRoleInAndActiveTrueOrderByFullNameAsc(UUID tenantId, Set<UserRole> roles);
 
     @Modifying
     @Query("UPDATE User u SET u.lastLoginAt = :loginAt, u.failedLoginAttempts = 0 WHERE u.id = :userId")

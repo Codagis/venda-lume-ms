@@ -14,9 +14,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.persistence.criteria.Predicate;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,7 +41,15 @@ public class ProductService {
 
     @Transactional
     public ProductResponse create(ProductCreateRequest request) {
-        UUID tenantId = SecurityUtils.requireTenantId();
+        UUID tenantId;
+        if (SecurityUtils.isCurrentUserRoot()) {
+            if (request.getTenantId() == null) {
+                throw new IllegalArgumentException("Selecione a empresa do produto.");
+            }
+            tenantId = request.getTenantId();
+        } else {
+            tenantId = SecurityUtils.requireTenantId();
+        }
         UUID userId = SecurityUtils.getCurrentUserId();
 
         validateSkuUnique(tenantId, null, request.getSku());
@@ -78,8 +90,17 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<ProductResponse> search(ProductFilterRequest filter) {
-        UUID tenantId = SecurityUtils.requireTenantId();
+    public PageResponse<ProductResponse> search(UUID requestTenantId, ProductFilterRequest filter) {
+        final UUID tenantId;
+        if (SecurityUtils.isCurrentUserRoot()) {
+            UUID chosen = requestTenantId != null ? requestTenantId : filter.getTenantId();
+            tenantId = chosen != null ? chosen : SecurityUtils.getTenantIdOptional().orElse(null);
+            if (tenantId == null) {
+                throw new IllegalStateException("Selecione uma empresa para listar os produtos.");
+            }
+        } else {
+            tenantId = SecurityUtils.requireTenantId();
+        }
 
         String sortField = isValidSortField(filter.getSortBy()) ? filter.getSortBy() : "name";
         Sort.Direction direction = "desc".equalsIgnoreCase(filter.getSortDirection())
@@ -90,17 +111,45 @@ public class ProductService {
                 Sort.by(direction, sortField)
         );
 
-        Page<Product> page = productRepository.searchByTenant(
-                tenantId,
-                filter.getActive(),
-                filter.getCategoryId(),
-                filter.getAvailableForSale(),
-                filter.getAvailableForDelivery(),
-                filter.getFeatured(),
-                filter.getLowStock(),
-                filter.getSearch() != null ? filter.getSearch().trim() : null,
-                pageable
-        );
+        Specification<Product> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(root.get("tenantId"), tenantId));
+            if (filter.getActive() != null) {
+                predicates.add(cb.equal(root.get("active"), filter.getActive()));
+            }
+            if (filter.getCategoryId() != null) {
+                predicates.add(cb.equal(root.get("categoryId"), filter.getCategoryId()));
+            }
+            if (filter.getAvailableForSale() != null) {
+                predicates.add(cb.equal(root.get("availableForSale"), filter.getAvailableForSale()));
+            }
+            if (filter.getAvailableForDelivery() != null) {
+                predicates.add(cb.equal(root.get("availableForDelivery"), filter.getAvailableForDelivery()));
+            }
+            if (Boolean.TRUE.equals(filter.getFeatured())) {
+                predicates.add(cb.equal(root.get("featured"), true));
+            }
+            if (Boolean.TRUE.equals(filter.getLowStock())) {
+                predicates.add(cb.equal(root.get("trackStock"), true));
+                predicates.add(cb.isNotNull(root.get("minStock")));
+                predicates.add(cb.lessThan(root.get("stockQuantity"), root.get("minStock")));
+            }
+            String search = filter.getSearch() != null ? filter.getSearch().trim() : null;
+            if (search != null && !search.isEmpty()) {
+                String pattern = "%" + search + "%";
+                Predicate searchPred = cb.or(
+                        cb.like(cb.lower(root.get("name")), pattern.toLowerCase()),
+                        cb.like(cb.lower(root.get("sku")), pattern.toLowerCase()),
+                        cb.equal(cb.lower(root.get("barcode")), search.toLowerCase()),
+                        cb.and(cb.isNotNull(root.get("brand")),
+                                cb.like(cb.lower(root.get("brand")), pattern.toLowerCase()))
+                );
+                predicates.add(searchPred);
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        Page<Product> page = productRepository.findAll(spec, pageable);
 
         return PageResponse.<ProductResponse>builder()
                 .content(page.getContent().stream().map(this::toResponse).toList())
@@ -160,11 +209,12 @@ public class ProductService {
 
     @Transactional
     public ProductResponse update(UUID id, ProductUpdateRequest request) {
-        UUID tenantId = SecurityUtils.requireTenantId();
         UUID userId = SecurityUtils.getCurrentUserId();
-
-        Product product = productRepository.findByIdAndTenantId(id, tenantId)
-                .orElseThrow(() -> new ResourceNotFoundException("Produto", id));
+        Product product = SecurityUtils.isCurrentUserRoot()
+                ? productRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Produto", id))
+                : productRepository.findByIdAndTenantId(id, SecurityUtils.requireTenantId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Produto", id));
+        UUID tenantId = product.getTenantId();
 
         validateSkuUnique(tenantId, id, request.getSku());
         if (request.getBarcode() != null && !request.getBarcode().isBlank()) {
@@ -180,9 +230,10 @@ public class ProductService {
 
     @Transactional
     public void delete(UUID id) {
-        UUID tenantId = SecurityUtils.requireTenantId();
-        Product product = productRepository.findByIdAndTenantId(id, tenantId)
-                .orElseThrow(() -> new ResourceNotFoundException("Produto", id));
+        Product product = SecurityUtils.isCurrentUserRoot()
+                ? productRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Produto", id))
+                : productRepository.findByIdAndTenantId(id, SecurityUtils.requireTenantId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Produto", id));
         productRepository.delete(product);
     }
 
@@ -249,6 +300,7 @@ public class ProductService {
                 .unitOfMeasure(req.getUnitOfMeasure())
                 .sellByWeight(req.getSellByWeight() != null ? req.getSellByWeight() : false)
                 .trackStock(req.getTrackStock() != null ? req.getTrackStock() : false)
+                .deductStockOnSale(req.getDeductStockOnSale() != null ? req.getDeductStockOnSale() : true)
                 .stockQuantity(req.getStockQuantity())
                 .minStock(req.getMinStock())
                 .allowNegativeStock(req.getAllowNegativeStock() != null ? req.getAllowNegativeStock() : false)
@@ -274,6 +326,9 @@ public class ProductService {
                 .availableForDelivery(req.getAvailableForDelivery() != null ? req.getAvailableForDelivery() : true)
                 .featured(req.getFeatured() != null ? req.getFeatured() : false)
                 .isComposite(req.getIsComposite() != null ? req.getIsComposite() : false)
+                .emitsNfce(req.getEmitsNfce() != null ? req.getEmitsNfce() : true)
+                .emitsNfe(req.getEmitsNfe() != null ? req.getEmitsNfe() : false)
+                .emitsComprovanteSimples(req.getEmitsComprovanteSimples() != null ? req.getEmitsComprovanteSimples() : true)
                 .displayOrder(req.getDisplayOrder())
                 .imageUrl(req.getImageUrl())
                 .imageUrls(req.getImageUrls())
@@ -297,6 +352,7 @@ public class ProductService {
         product.setUnitOfMeasure(req.getUnitOfMeasure());
         product.setSellByWeight(req.getSellByWeight() != null ? req.getSellByWeight() : false);
         product.setTrackStock(req.getTrackStock() != null ? req.getTrackStock() : false);
+        product.setDeductStockOnSale(req.getDeductStockOnSale() != null ? req.getDeductStockOnSale() : true);
         product.setStockQuantity(req.getStockQuantity());
         product.setMinStock(req.getMinStock());
         product.setAllowNegativeStock(req.getAllowNegativeStock() != null ? req.getAllowNegativeStock() : false);
@@ -322,6 +378,9 @@ public class ProductService {
         product.setAvailableForDelivery(req.getAvailableForDelivery() != null ? req.getAvailableForDelivery() : true);
         product.setFeatured(req.getFeatured() != null ? req.getFeatured() : false);
         product.setIsComposite(req.getIsComposite() != null ? req.getIsComposite() : false);
+        product.setEmitsNfce(req.getEmitsNfce() != null ? req.getEmitsNfce() : true);
+        product.setEmitsNfe(req.getEmitsNfe() != null ? req.getEmitsNfe() : false);
+        product.setEmitsComprovanteSimples(req.getEmitsComprovanteSimples() != null ? req.getEmitsComprovanteSimples() : true);
         product.setDisplayOrder(req.getDisplayOrder());
         product.setImageUrl(req.getImageUrl());
         product.setImageUrls(req.getImageUrls());
@@ -347,6 +406,7 @@ public class ProductService {
                 .unitOfMeasure(p.getUnitOfMeasure())
                 .sellByWeight(p.getSellByWeight())
                 .trackStock(p.getTrackStock())
+                .deductStockOnSale(p.getDeductStockOnSale())
                 .stockQuantity(p.getStockQuantity())
                 .minStock(p.getMinStock())
                 .allowNegativeStock(p.getAllowNegativeStock())
@@ -372,6 +432,9 @@ public class ProductService {
                 .availableForDelivery(p.getAvailableForDelivery())
                 .featured(p.getFeatured())
                 .isComposite(p.getIsComposite())
+                .emitsNfce(p.getEmitsNfce())
+                .emitsNfe(p.getEmitsNfe())
+                .emitsComprovanteSimples(p.getEmitsComprovanteSimples())
                 .displayOrder(p.getDisplayOrder())
                 .imageUrl(p.getImageUrl())
                 .imageUrls(p.getImageUrls())

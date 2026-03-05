@@ -135,6 +135,11 @@ public class Product extends BaseAuditableEntity {
     @Builder.Default
     private Boolean trackStock = false;
 
+    @Comment("Se true, dá baixa no estoque automaticamente nas vendas. Se false, a baixa deve ser feita manualmente.")
+    @Column(name = "deduct_stock_on_sale", nullable = false)
+    @Builder.Default
+    private Boolean deductStockOnSale = true;
+
     @Comment("Quantidade atual disponível em estoque")
     @Column(name = "stock_quantity", precision = 19, scale = 4)
     private BigDecimal stockQuantity;
@@ -256,6 +261,21 @@ public class Product extends BaseAuditableEntity {
     @Comment("URL de vídeo demonstrativo do produto")
     @Column(name = "video_url", length = 500)
     private String videoUrl;
+
+    @Comment("Produto deve aparecer em NFC-e (cupom fiscal)")
+    @Column(name = "emits_nfce", nullable = false)
+    @Builder.Default
+    private Boolean emitsNfce = true;
+
+    @Comment("Produto deve aparecer em NF-e")
+    @Column(name = "emits_nfe", nullable = false)
+    @Builder.Default
+    private Boolean emitsNfe = false;
+
+    @Comment("Produto deve aparecer no comprovante simples de venda")
+    @Column(name = "emits_comprovante_simples", nullable = false)
+    @Builder.Default
+    private Boolean emitsComprovanteSimples = true;
 
     @jakarta.persistence.PrePersist
     protected void generateId() {
