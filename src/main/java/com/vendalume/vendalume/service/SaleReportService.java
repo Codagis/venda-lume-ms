@@ -50,6 +50,7 @@ public class SaleReportService {
     private final TenantRepository tenantRepository;
     private final TemplateEngine templateEngine;
 
+
     public byte[] generateExcelReport(UUID requestTenantId, SaleFilterRequest filter) {
         List<SaleResponse> sales = saleService.getSalesForReport(requestTenantId, filter);
         SaleSummaryResponse summary = saleService.getSummary(requestTenantId, filter);
