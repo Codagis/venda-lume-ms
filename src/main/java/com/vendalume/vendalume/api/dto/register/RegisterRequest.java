@@ -33,4 +33,10 @@ public class RegisterRequest {
 
     @Schema(description = "Se está ativo", example = "true")
     private Boolean active;
+
+    @Schema(description = "IMEI ou identificador único do equipamento (gerado pelo dispositivo)")
+    private String imei;
+
+    @Schema(description = "Senha de acesso ao PDV (opcional; ao informar, será armazenada com hash)")
+    private String accessPassword;
 }

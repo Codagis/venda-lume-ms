@@ -28,6 +28,9 @@ public class RegisterResponse {
     private EquipmentType equipmentType;
     private String description;
     private Boolean active;
+    private String imei;
+    @Schema(description = "Se o PDV possui senha de acesso configurada (nunca retorna a senha)")
+    private Boolean hasAccessPassword;
     private Instant createdAt;
     private Instant updatedAt;
 

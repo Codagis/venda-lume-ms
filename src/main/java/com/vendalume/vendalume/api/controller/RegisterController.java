@@ -7,6 +7,8 @@ import com.vendalume.vendalume.api.dto.register.RegisterRequest;
 import com.vendalume.vendalume.api.dto.register.RegisterResponse;
 import com.vendalume.vendalume.api.dto.register.RegisterSessionDetailResponse;
 import com.vendalume.vendalume.api.dto.register.RegisterSessionResponse;
+import com.vendalume.vendalume.api.dto.register.StartSessionRequest;
+import com.vendalume.vendalume.api.dto.register.VerifyPdvPasswordRequest;
 import com.vendalume.vendalume.service.RegisterService;
 import com.vendalume.vendalume.service.RegisterSessionService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -37,12 +39,14 @@ public class RegisterController {
     private final RegisterSessionService registerSessionService;
 
     @GetMapping
-    @Operation(summary = "Listar pontos de venda")
+    @Operation(summary = "Listar pontos de venda. Com activeOnly e forCurrentOperator=true, retorna só os PDVs que o operador pode usar (root vê todos). Envie X-Device-IMEI para filtrar por dispositivo vinculado.")
     public ResponseEntity<List<RegisterResponse>> list(
             @RequestParam(required = false) UUID tenantId,
-            @RequestParam(required = false, defaultValue = "false") boolean activeOnly) {
+            @RequestParam(required = false, defaultValue = "false") boolean activeOnly,
+            @RequestParam(required = false, defaultValue = "false") boolean forCurrentOperator,
+            @RequestHeader(value = "X-Device-IMEI", required = false) String deviceImei) {
         List<RegisterResponse> list = activeOnly
-                ? registerService.listActiveByTenant(tenantId)
+                ? registerService.listActiveByTenant(tenantId, forCurrentOperator, deviceImei)
                 : registerService.listByTenant(tenantId);
         return ResponseEntity.ok(list);
     }
@@ -53,6 +57,26 @@ public class RegisterController {
             @PathVariable UUID id,
             @RequestParam(required = false) UUID tenantId) {
         return ResponseEntity.ok(registerService.getById(id, tenantId));
+    }
+
+    @GetMapping("/by-imei")
+    @Operation(summary = "Obter ou criar PDV pelo IMEI do equipamento")
+    public ResponseEntity<RegisterResponse> getOrCreateByImei(
+            @RequestParam String imei,
+            @RequestParam(required = false) UUID tenantId) {
+        return ResponseEntity.ok(registerService.getOrCreateByImei(imei, tenantId));
+    }
+
+    @PostMapping("/{id}/verify-password")
+    @Operation(summary = "Verificar senha de acesso do PDV")
+    public ResponseEntity<Void> verifyPdvPassword(
+            @PathVariable UUID id,
+            @Valid @RequestBody VerifyPdvPasswordRequest request,
+            @RequestParam(required = false) UUID tenantId) {
+        if (!registerService.verifyPdvPassword(id, request.getPassword(), tenantId)) {
+            return ResponseEntity.status(401).build();
+        }
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping
@@ -97,11 +121,12 @@ public class RegisterController {
     }
 
     @PostMapping("/{id}/session/start")
-    @Operation(summary = "Iniciar sessão do PDV (auditoria)")
+    @Operation(summary = "Iniciar sessão do PDV (auditoria). Se o PDV tiver senha, envie pdvPassword no body.")
     public ResponseEntity<RegisterSessionResponse> startSession(
             @PathVariable UUID id,
+            @RequestBody(required = false) StartSessionRequest request,
             @RequestParam(required = false) UUID tenantId) {
-        return ResponseEntity.ok(registerSessionService.startSession(id, tenantId));
+        return ResponseEntity.ok(registerSessionService.startSession(id, request, tenantId));
     }
 
     @PostMapping("/{id}/session/end")

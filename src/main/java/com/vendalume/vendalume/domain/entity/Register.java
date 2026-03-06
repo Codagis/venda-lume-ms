@@ -15,7 +15,8 @@ import java.util.UUID;
     name = "registers",
     indexes = {
         @Index(name = "idx_register_tenant", columnList = "tenant_id"),
-        @Index(name = "idx_register_tenant_active", columnList = "tenant_id, active")
+        @Index(name = "idx_register_tenant_active", columnList = "tenant_id, active"),
+        @Index(name = "idx_register_imei", columnList = "imei")
     },
     uniqueConstraints = {
         @UniqueConstraint(name = "uk_register_tenant_name", columnNames = {"tenant_id", "name"})
@@ -59,6 +60,14 @@ public class Register extends BaseAuditableEntity {
     @Column(name = "active", nullable = false)
     @Builder.Default
     private Boolean active = true;
+
+    @Comment("IMEI ou identificador único do equipamento (gerado pelo dispositivo)")
+    @Column(name = "imei", length = 100, unique = true)
+    private String imei;
+
+    @Comment("Hash BCrypt da senha de acesso ao PDV neste equipamento")
+    @Column(name = "access_password_hash", length = 255)
+    private String accessPasswordHash;
 
     @BatchSize(size = 16)
     @OneToMany(mappedBy = "register", cascade = CascadeType.ALL, orphanRemoval = true)

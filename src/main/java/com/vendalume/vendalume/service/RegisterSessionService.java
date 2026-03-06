@@ -2,6 +2,7 @@ package com.vendalume.vendalume.service;
 
 import com.vendalume.vendalume.api.dto.register.RegisterSessionDetailResponse;
 import com.vendalume.vendalume.api.dto.register.RegisterSessionResponse;
+import com.vendalume.vendalume.api.dto.register.StartSessionRequest;
 import com.vendalume.vendalume.api.dto.sale.SaleResponse;
 import com.vendalume.vendalume.api.exception.ResourceNotFoundException;
 import com.vendalume.vendalume.domain.entity.Register;
@@ -15,6 +16,7 @@ import com.vendalume.vendalume.repository.SaleRepository;
 import com.vendalume.vendalume.repository.UserRepository;
 import com.vendalume.vendalume.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,15 +46,28 @@ public class RegisterSessionService {
     private final UserRepository userRepository;
     private final SaleRepository saleRepository;
     private final SaleService saleService;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public RegisterSessionResponse startSession(UUID registerId, UUID requestTenantId) {
+    public RegisterSessionResponse startSession(UUID registerId, StartSessionRequest request, UUID requestTenantId) {
         UUID tenantId = resolveTenantId(requestTenantId);
         UUID userId = SecurityUtils.getCurrentUserId();
         Register register = registerRepository.findByIdAndTenantId(registerId, tenantId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ponto de venda", registerId));
-        if (!registerOperatorRepository.existsByRegisterIdAndUserId(registerId, userId)) {
+        if (!SecurityUtils.isCurrentUserRoot() && !registerOperatorRepository.existsByRegisterIdAndUserId(registerId, userId)) {
             throw new IllegalArgumentException("Usuário não é operador deste caixa.");
+        }
+        if (register.getImei() != null && !register.getImei().isBlank() && !SecurityUtils.isCurrentUserRoot()) {
+            String deviceImei = request != null ? request.getDeviceImei() : null;
+            if (deviceImei == null || deviceImei.isBlank() || !register.getImei().trim().equals(deviceImei.trim())) {
+                throw new IllegalArgumentException("Este caixa só pode ser operado no dispositivo vinculado (tablet/equipamento). Você está em outro dispositivo.");
+            }
+        }
+        if (register.getAccessPasswordHash() != null && !register.getAccessPasswordHash().isBlank()) {
+            String pdvPassword = request != null ? request.getPdvPassword() : null;
+            if (pdvPassword == null || pdvPassword.isBlank() || !passwordEncoder.matches(pdvPassword, register.getAccessPasswordHash())) {
+                throw new IllegalArgumentException("Senha do PDV incorreta ou não informada.");
+            }
         }
         registerSessionRepository.findOpenByRegisterIdAndUserId(registerId, userId).ifPresent(open -> {
             open.setClosedAt(Instant.now());
