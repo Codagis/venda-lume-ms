@@ -11,6 +11,13 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+/**
+ * DTO de requisição para registrar pagamento.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
 @Data
 @Builder
 @NoArgsConstructor

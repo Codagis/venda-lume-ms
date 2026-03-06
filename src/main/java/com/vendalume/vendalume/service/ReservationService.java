@@ -24,6 +24,13 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * Serviço de gestão de reservas de mesas.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
 @Service
 @RequiredArgsConstructor
 public class ReservationService {
@@ -52,7 +59,6 @@ public class ReservationService {
         return toResponse(reservation);
     }
 
-    /** Usado pelo comprovante PDF; suporta root. */
     @Transactional(readOnly = true)
     public ReservationResponse getReservationForReceipt(UUID id) {
         Reservation reservation = findEntity(id);

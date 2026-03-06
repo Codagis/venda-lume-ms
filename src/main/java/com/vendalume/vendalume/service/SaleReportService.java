@@ -37,6 +37,10 @@ import com.vendalume.vendalume.domain.enums.SaleType;
 
 /**
  * Serviço para geração de relatórios de vendas em Excel (XLS) e PDF.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
  */
 @Service
 @RequiredArgsConstructor
@@ -79,7 +83,6 @@ public class SaleReportService {
 
             int rowNum = 0;
 
-            // Cabeçalho
             Row headerRow = sheet.createRow(rowNum++);
             String empresa = tenant != null && tenant.getTradeName() != null && !tenant.getTradeName().isBlank()
                     ? tenant.getTradeName() : (tenant != null ? tenant.getName() : "VendaLume");
@@ -95,9 +98,8 @@ public class SaleReportService {
             createCell(summaryRow, 1, "Valor total: R$ " + formatDecimal(summary != null ? summary.getTotalAmount() : BigDecimal.ZERO));
             rowNum++;
 
-            rowNum++; // linha em branco
+            rowNum++;
 
-            // Cabeçalho da tabela
             Row tableHeader = sheet.createRow(rowNum++);
             String[] headers = {"Número", "Data", "Cliente", "Status", "Tipo", "Pagamento", "Subtotal", "Desconto", "Total"};
             for (int i = 0; i < headers.length; i++) {
@@ -152,7 +154,6 @@ public class SaleReportService {
         String taxas = formatDecimal(summary != null ? summary.getTaxAmount() : BigDecimal.ZERO);
         String fretes = formatDecimal(summary != null ? summary.getDeliveryFeeAmount() : BigDecimal.ZERO);
 
-        // Totais por tipo de venda
         Map<String, SummaryItem> porTipoMap = new LinkedHashMap<>();
         for (SaleType st : SaleType.values()) {
             porTipoMap.put(st.name(), new SummaryItem(st.getDescription(), 0, BigDecimal.ZERO));
@@ -169,7 +170,6 @@ public class SaleReportService {
         porTipoMap.values().forEach(i -> i.valorFormatado = formatDecimal(i.valor));
         List<SummaryItem> porTipo = new ArrayList<>(porTipoMap.values());
 
-        // Totais por forma de pagamento (segmento)
         Map<String, SummaryItem> porSegmentoMap = new LinkedHashMap<>();
         for (PaymentMethod pm : PaymentMethod.values()) {
             porSegmentoMap.put(pm.name(), new SummaryItem(pm.getDescription(), 0, BigDecimal.ZERO));

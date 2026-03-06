@@ -9,8 +9,12 @@ import com.vendalume.vendalume.api.dto.auth.UserResponse;
 import com.vendalume.vendalume.config.JwtProperties;
 import com.vendalume.vendalume.domain.entity.User;
 import com.vendalume.vendalume.repository.UserRepository;
+import com.vendalume.vendalume.security.CookieAuthHelper;
 import com.vendalume.vendalume.security.JwtClaims;
 import com.vendalume.vendalume.security.JwtTokenProvider;
+import com.vendalume.vendalume.security.SecurityUtils;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
@@ -41,9 +45,72 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtProperties jwtProperties;
+    private final CookieAuthHelper cookieAuthHelper;
 
     @Transactional
-    public LoginResponse login(LoginRequest request) {
+    public LoginResponse login(LoginRequest request, HttpServletResponse response) {
+        User user = authenticateUser(request);
+        LoginResponse tokenResponse = buildTokenResponse(user);
+        cookieAuthHelper.addAccessTokenCookie(response, tokenResponse.getAccessToken());
+        cookieAuthHelper.addRefreshTokenCookie(response, tokenResponse.getRefreshToken());
+        return buildLoginResponseWithoutTokens(tokenResponse);
+    }
+
+    @Transactional(readOnly = true)
+    public LoginResponse refresh(RefreshRequest request, HttpServletRequest httpRequest, HttpServletResponse response) {
+        String refreshTokenValue = request != null && request.getRefreshToken() != null && !request.getRefreshToken().isBlank()
+                ? request.getRefreshToken()
+                : cookieAuthHelper.getRefreshTokenFromCookie(httpRequest);
+
+        if (refreshTokenValue == null || refreshTokenValue.isBlank()) {
+            throw new BadCredentialsException("Refresh token ausente. Faça login novamente.");
+        }
+
+        JwtClaims claims = jwtTokenProvider.parseToken(refreshTokenValue);
+
+        if (!"refresh".equals(claims.getType())) {
+            throw new BadCredentialsException("Token inválido");
+        }
+
+        User user = userRepository.findById(claims.getUserId())
+                .orElseThrow(() -> new BadCredentialsException("Usuário não encontrado"));
+
+        if (!user.isEnabled()) {
+            throw new BadCredentialsException("Usuário inativo");
+        }
+
+        if (!claims.getTokenVersion().equals(user.getRefreshTokenVersion())) {
+            throw new BadCredentialsException("Token revogado. Faça login novamente.");
+        }
+
+        LoginResponse tokenResponse = buildTokenResponse(user);
+        cookieAuthHelper.addAccessTokenCookie(response, tokenResponse.getAccessToken());
+        cookieAuthHelper.addRefreshTokenCookie(response, tokenResponse.getRefreshToken());
+        return buildLoginResponseWithoutTokens(tokenResponse);
+    }
+
+    public void logout(HttpServletResponse response) {
+        cookieAuthHelper.clearAuthCookies(response);
+    }
+
+    public UserInfo getCurrentUserInfo() {
+        User user = SecurityUtils.requireCurrentUser();
+        return UserInfo.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .fullName(user.getFullName())
+                .role(user.getRole().name())
+                .tenantId(user.getTenantId())
+                .isRoot(user.getIsRoot())
+                .profileId(user.getProfileId())
+                .authorities(user.getAuthorities().stream()
+                        .map(a -> a.getAuthority())
+                        .collect(Collectors.toSet()))
+                .build();
+    }
+
+    private User authenticateUser(LoginRequest request) {
         User user = userRepository.findByUsernameIgnoreCase(request.getUsername())
                 .orElseThrow(() -> new BadCredentialsException("Credenciais inválidas"));
 
@@ -68,30 +135,18 @@ public class AuthService {
         user.setLastLoginAt(Instant.now());
         user.setFailedLoginAttempts(0);
         user.setLockedUntil(null);
-
-        return buildTokenResponse(user);
+        return user;
     }
 
-    @Transactional(readOnly = true)
-    public LoginResponse refresh(RefreshRequest request) {
-        JwtClaims claims = jwtTokenProvider.parseToken(request.getRefreshToken());
-
-        if (!"refresh".equals(claims.getType())) {
-            throw new BadCredentialsException("Token inválido");
-        }
-
-        User user = userRepository.findById(claims.getUserId())
-                .orElseThrow(() -> new BadCredentialsException("Usuário não encontrado"));
-
-        if (!user.isEnabled()) {
-            throw new BadCredentialsException("Usuário inativo");
-        }
-
-        if (!claims.getTokenVersion().equals(user.getRefreshTokenVersion())) {
-            throw new BadCredentialsException("Token revogado. Faça login novamente.");
-        }
-
-        return buildTokenResponse(user);
+    private LoginResponse buildLoginResponseWithoutTokens(LoginResponse full) {
+        return LoginResponse.builder()
+                .accessToken(null)
+                .refreshToken(null)
+                .tokenType("Bearer")
+                .expiresIn(jwtProperties.getAccessTokenValidity())
+                .refreshExpiresIn(jwtProperties.getRefreshTokenValidity())
+                .user(full.getUser())
+                .build();
     }
 
     @Transactional

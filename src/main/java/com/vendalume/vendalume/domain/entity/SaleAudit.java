@@ -4,6 +4,7 @@ import com.vendalume.vendalume.domain.enums.SaleAuditEventType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
+import jakarta.persistence.Index;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -17,7 +18,11 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "sale_audit")
+@Table(name = "sale_audit", indexes = {
+        @Index(name = "idx_sale_audit_sale_id", columnList = "sale_id"),
+        @Index(name = "idx_sale_audit_occurred_at", columnList = "occurred_at"),
+        @Index(name = "idx_sale_audit_sale_occurred", columnList = "sale_id, occurred_at")
+})
 @Getter
 @Setter
 @NoArgsConstructor

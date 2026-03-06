@@ -19,6 +19,10 @@ import java.util.UUID;
 
 /**
  * Serviço para geração do comprovante de reserva em PDF.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
  */
 @Service
 @RequiredArgsConstructor

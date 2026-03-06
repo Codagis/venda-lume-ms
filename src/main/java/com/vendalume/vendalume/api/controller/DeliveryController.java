@@ -1,5 +1,6 @@
 package com.vendalume.vendalume.api.controller;
 
+import com.vendalume.vendalume.api.documentation.DefaultApiResponses;
 import com.vendalume.vendalume.api.dto.delivery.*;
 import com.vendalume.vendalume.api.dto.product.PageResponse;
 import com.vendalume.vendalume.api.dto.sale.SaleResponse;
@@ -18,6 +19,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Controller de entregas e acompanhamento.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
+@DefaultApiResponses
 @RestController
 @RequestMapping("/deliveries")
 @RequiredArgsConstructor

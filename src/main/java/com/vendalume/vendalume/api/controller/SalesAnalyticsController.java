@@ -1,5 +1,6 @@
 package com.vendalume.vendalume.api.controller;
 
+import com.vendalume.vendalume.api.documentation.DefaultApiResponses;
 import com.vendalume.vendalume.api.dto.analytics.SalesAnalyticsResponse;
 import com.vendalume.vendalume.service.SalesAnalyticsService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,6 +13,14 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.UUID;
 
+/**
+ * Controller de análise de vendas e estratégias.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
+@DefaultApiResponses
 @RestController
 @RequestMapping("/analytics/sales")
 @RequiredArgsConstructor

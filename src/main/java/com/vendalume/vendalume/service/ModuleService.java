@@ -19,8 +19,11 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
- * Serviço de módulos. Retorna apenas os módulos que o usuário tem permissão para visualizar.
- * Root vê todos; demais usuários veem apenas módulos cuja view_permission_code está no perfil.
+ * Serviço de gestão de módulos do sistema.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
  */
 @Service
 @RequiredArgsConstructor
@@ -29,11 +32,6 @@ public class ModuleService {
     private final ModuleRepository moduleRepository;
     private final ProfileRepository profileRepository;
 
-    /**
-     * Lista módulos disponíveis para o usuário atual.
-     * Root: todos os módulos ativos.
-     * Outros: módulos cuja permissão de visualização está no perfil do usuário.
-     */
     public List<ModuleResponse> listForCurrentUser() {
         User user = SecurityUtils.requireCurrentUser();
 
@@ -63,7 +61,6 @@ public class ModuleService {
                 .collect(Collectors.toSet());
     }
 
-    /** Lista todos os módulos para administração (somente root). */
     public List<ModuleResponse> listAllForAdmin() {
         if (!SecurityUtils.isCurrentUserRoot()) {
             throw new IllegalArgumentException("Acesso negado. Apenas root.");

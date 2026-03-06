@@ -20,6 +20,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Serviço de análise de vendas.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
 @Service
 @RequiredArgsConstructor
 public class SalesAnalyticsService {

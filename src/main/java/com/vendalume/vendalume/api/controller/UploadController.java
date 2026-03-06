@@ -1,5 +1,6 @@
 package com.vendalume.vendalume.api.controller;
 
+import com.vendalume.vendalume.api.documentation.DefaultApiResponses;
 import com.vendalume.vendalume.security.SecurityUtils;
 import com.vendalume.vendalume.service.GcsStorageService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,12 +17,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Endpoint genérico de upload de imagens para o Google Cloud Storage.
- * Retorna a URL pública do arquivo para uso em logo da empresa, foto de produto, etc.
- * Para produtos: bucket organizado por empresa/produtos/{id}-{nome-produto}
+ * Controller de upload de imagens para Google Cloud Storage.
  *
  * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
  */
+@DefaultApiResponses
 @RestController
 @RequestMapping("/upload")
 @RequiredArgsConstructor
@@ -54,7 +56,6 @@ public class UploadController {
         }
     }
 
-    /** Organização: tenants/{tenantId}/products/{productId}-{slug} ou tenants/{tenantId}/products/novo */
     private String resolveFolder(String folder, String type, UUID productId, String productName) {
         if (folder != null && !folder.isBlank()) {
             return folder;

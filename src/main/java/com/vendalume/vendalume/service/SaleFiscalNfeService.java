@@ -19,7 +19,10 @@ import java.util.UUID;
 
 /**
  * Serviço para emissão de NF-e (Nota Fiscal Eletrônica) via Fiscal Simplify.
- * Emite a nota, persiste chave/número na venda e retorna o PDF (DANFE).
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
  */
 @Service
 @RequiredArgsConstructor
@@ -60,7 +63,6 @@ public class SaleFiscalNfeService {
         }
 
         if (sale.getInvoiceKey() != null && !sale.getInvoiceKey().isBlank()) {
-            // O PDF da Nuvem Fiscal exige o id interno do documento, não a chave (44 dígitos)
             String docId = sale.getInvoiceDocumentId();
             if (docId == null || docId.isBlank()) {
                 throw new IllegalStateException(

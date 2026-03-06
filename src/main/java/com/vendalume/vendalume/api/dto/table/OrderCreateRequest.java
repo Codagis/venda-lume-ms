@@ -8,13 +8,19 @@ import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
+/**
+ * DTO de requisição para criar comanda.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderCreateRequest {
 
-    /** Obrigatório para root ao operar em outra empresa, ignorado para não-root. */
     private UUID tenantId;
 
     @NotNull(message = "ID da mesa é obrigatório")

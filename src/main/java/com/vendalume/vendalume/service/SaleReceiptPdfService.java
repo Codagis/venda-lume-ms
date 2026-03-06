@@ -30,7 +30,10 @@ import java.util.UUID;
 
 /**
  * Serviço para geração do PDF do cupom fiscal da venda.
- * Utiliza Thymeleaf para o layout e OpenHTML to PDF para renderização.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
  */
 @Service
 @RequiredArgsConstructor
@@ -79,7 +82,6 @@ public class SaleReceiptPdfService {
     }
 
     private ReceiptPdfContext buildContext(SaleResponse sale, Tenant tenant) {
-        // Dados da empresa
         String razaoSocial = tenant != null ? (tenant.getName() != null ? tenant.getName() : "-") : "VendaLume";
         String nomeFantasia = tenant != null && tenant.getTradeName() != null && !tenant.getTradeName().isBlank()
                 ? tenant.getTradeName() : razaoSocial;
@@ -91,18 +93,15 @@ public class SaleReceiptPdfService {
         String im = tenant != null && tenant.getMunicipalRegistration() != null && !tenant.getMunicipalRegistration().isBlank()
                 ? tenant.getMunicipalRegistration() : "ISENTO";
 
-        // Dados do cupom
         String dataEmissao = sale.getSaleDate() != null ? sale.getSaleDate().format(DATE_FMT) : "-";
         String horaEmissao = sale.getSaleDate() != null ? sale.getSaleDate().format(TIME_FMT) : "-";
         String ccf = sale.getSaleNumber() != null ? padLeft(sale.getSaleNumber(), 6) : "000000";
         String coo = ccf;
 
-        // Dados do consumidor
         String cpfCnpj = sale.getCustomerDocument();
         String nomeConsumidor = sale.getCustomerName();
         String enderecoConsumidor = sale.getDeliveryAddress();
 
-        // Itens
         List<ReceiptItemDto> listaItens = new ArrayList<>();
         if (sale.getItems() != null) {
             for (SaleItemResponse item : sale.getItems()) {
@@ -116,12 +115,10 @@ public class SaleReceiptPdfService {
             }
         }
 
-        // Totais
         BigDecimal subtotal = sale.getSubtotal() != null ? sale.getSubtotal() : BigDecimal.ZERO;
         BigDecimal desconto = sale.getDiscountAmount() != null ? sale.getDiscountAmount() : BigDecimal.ZERO;
         BigDecimal total = sale.getTotal() != null ? sale.getTotal() : BigDecimal.ZERO;
 
-        // Pagamento
         String formaPagto = sale.getPaymentMethod() != null ? sale.getPaymentMethod().getDescription() : "-";
         String valorRecebido = sale.getAmountPaid() != null ? formatDecimal(sale.getAmountPaid()) : null;
         BigDecimal troco = sale.getChangeAmount();
@@ -131,7 +128,6 @@ public class SaleReceiptPdfService {
             valorParcela = total.divide(BigDecimal.valueOf(qtdParcelas), 2, java.math.RoundingMode.HALF_UP);
         }
 
-        // MD5 e dados fiscais
         String hashMd5 = generateReceiptMd5(sale);
         String ecfSerie = generateSaleSerialNumber(sale, tenant);
         String ecfModelo = tenant != null && tenant.getEcfModel() != null && !tenant.getEcfModel().isBlank()

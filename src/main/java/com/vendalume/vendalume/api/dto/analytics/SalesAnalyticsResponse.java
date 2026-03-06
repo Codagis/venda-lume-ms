@@ -13,6 +13,13 @@ import java.util.List;
  * Resposta da API de análise de vendas e estratégias.
  * Produtos mais vendidos, segmentos e recomendações.
  */
+/**
+ * DTO de resposta com análise de vendas.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
 @Data
 @Builder
 @NoArgsConstructor

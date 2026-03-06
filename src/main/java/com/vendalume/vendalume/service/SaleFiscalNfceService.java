@@ -15,9 +15,10 @@ import java.util.UUID;
 
 /**
  * Serviço para emissão de NFC-e (cupom fiscal) via Fiscal Simplify.
- * Emite a nota fiscal eletrônica e retorna o PDF oficial da SEFAZ.
  *
  * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
  */
 @Service
 @RequiredArgsConstructor

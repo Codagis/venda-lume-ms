@@ -19,6 +19,8 @@ import java.util.Optional;
  * Configura o cliente do Google Cloud Storage quando GCS está habilitado.
  *
  * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
  */
 @Slf4j
 @Configuration

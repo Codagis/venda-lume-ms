@@ -10,6 +10,13 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * DTO de resposta com dados da comanda.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
 @Data
 @Builder
 @NoArgsConstructor

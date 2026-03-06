@@ -1,5 +1,6 @@
 package com.vendalume.vendalume.api.controller;
 
+import com.vendalume.vendalume.api.documentation.DefaultApiResponses;
 import com.vendalume.vendalume.api.dto.cardmachine.CardMachineRequest;
 import com.vendalume.vendalume.api.dto.cardmachine.CardMachineResponse;
 import com.vendalume.vendalume.service.CardMachineService;
@@ -15,6 +16,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Controller de maquininhas por empresa.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
+@DefaultApiResponses
 @RestController
 @RequestMapping("/tenants")
 @RequiredArgsConstructor

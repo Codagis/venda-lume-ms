@@ -21,6 +21,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Comment;
 
 import java.math.BigDecimal;
@@ -237,6 +238,7 @@ public class Sale extends BaseAuditableEntity {
     @Column(name = "invoice_document_id", length = 100)
     private String invoiceDocumentId;
 
+    @BatchSize(size = 16)
     @Builder.Default
     @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SaleItem> items = new ArrayList<>();

@@ -8,6 +8,8 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
  * Condição para criar beans GCS apenas quando vendalume.gcs.enabled=true.
  *
  * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
  */
 public class GcsEnabledCondition implements Condition {
 

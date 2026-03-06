@@ -9,6 +9,13 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * DTO de resposta com dados do ponto de venda.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
 @Data
 @Builder
 @Schema(description = "Ponto de venda (caixa)")

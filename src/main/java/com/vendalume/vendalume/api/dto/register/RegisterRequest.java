@@ -6,6 +6,13 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+/**
+ * DTO de requisição para criar/editar ponto de venda.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
 @Data
 @Schema(description = "Dados para criar/editar ponto de venda")
 public class RegisterRequest {

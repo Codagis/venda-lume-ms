@@ -9,7 +9,9 @@ import java.util.UUID;
 @Entity
 @Table(name = "customers", indexes = {
     @Index(name = "idx_customer_tenant_active", columnList = "tenant_id, active"),
-    @Index(name = "idx_customer_tenant_name", columnList = "tenant_id, name")
+    @Index(name = "idx_customer_tenant_name", columnList = "tenant_id, name"),
+    @Index(name = "idx_customer_tenant_document", columnList = "tenant_id, document"),
+    @Index(name = "idx_customer_created_at", columnList = "created_at")
 })
 @Getter
 @Setter

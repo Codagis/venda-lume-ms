@@ -8,6 +8,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * DTO de requisição de tenant.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
 @Data
 @Builder
 @NoArgsConstructor
@@ -62,35 +69,26 @@ public class TenantRequest {
     @Size(max = 20)
     private String municipalRegistration;
 
-    /** Código IBGE do município (7 dígitos) - ex: 2304400 Fortaleza/CE - obrigatório para emissão NFC-e Fiscal Simplify */
     @Size(max = 7)
     private String codigoMunicipio;
 
-    /** CRT - Código de Regime Tributário: 1=Simples Nacional, 2=Excesso sublimite, 3=Regime Normal, 4=MEI */
     private Integer crt;
 
-    /** ID do CSC (geralmente 0) */
     private Integer idCsc;
 
-    /** CSC - Código Segurança Contribuinte obtido na SEFAZ do estado */
     @Size(max = 100)
     private String csc;
 
-    /** Ambiente: homologacao ou producao */
     @Size(max = 20)
     private String ambienteFiscal;
 
-    /** CRT para NF-e na Nuvem Fiscal (1 a 4). Se não informado, usa o mesmo da NFC-e. */
     private Integer crtNfe;
 
-    /** Ambiente NF-e na Nuvem Fiscal: homologacao ou producao. Se não informado, usa o mesmo da NFC-e. */
     @Size(max = 20)
     private String ambienteNfe;
 
-    /** Certificado PFX em Base64 - enviado ao Fiscal Simplify, não armazenado */
     private String certificadoPfxBase64;
 
-    /** Senha do certificado PFX */
     @Size(max = 100)
     private String certificadoPassword;
 

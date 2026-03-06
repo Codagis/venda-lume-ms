@@ -28,6 +28,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Serviço de controle de custos (contas a pagar e contas a receber).
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
 @Service
 @RequiredArgsConstructor
 public class CostControlService {
@@ -40,8 +47,6 @@ public class CostControlService {
     private final SupplierRepository supplierRepository;
     private final CustomerRepository customerRepository;
     private final SaleRepository saleRepository;
-
-    // --- Account Payable ---
 
     @Transactional
     public AccountPayableResponse createPayable(AccountPayableCreateRequest request) {
@@ -117,8 +122,6 @@ public class CostControlService {
                 .orElseThrow(() -> new ResourceNotFoundException("Conta a pagar", id));
         apRepository.delete(ap);
     }
-
-    // --- Account Receivable ---
 
     @Transactional
     public AccountReceivableResponse createReceivable(AccountReceivableCreateRequest request) {

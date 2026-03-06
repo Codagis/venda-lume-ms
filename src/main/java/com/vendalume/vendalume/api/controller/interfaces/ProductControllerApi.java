@@ -1,4 +1,4 @@
-package com.vendalume.vendalume.api.controller;
+package com.vendalume.vendalume.api.controller.interfaces;
 
 import com.vendalume.vendalume.api.documentation.ApiDocumentedController;
 import com.vendalume.vendalume.api.documentation.DefaultApiResponses;
@@ -23,7 +23,6 @@ import java.util.UUID;
 
 /**
  * Interface do controller de produtos.
- * Contém as anotações de endpoint e assinaturas dos métodos.
  *
  * @author VendaLume
  * @version 1.0.0

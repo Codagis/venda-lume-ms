@@ -33,6 +33,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Serviço de gestão de entregas.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
 @Service
 @RequiredArgsConstructor
 public class DeliveryService {
@@ -88,7 +95,6 @@ public class DeliveryService {
         return toResponse(delivery);
     }
 
-    /** Retorna o endereço completo da empresa (origem para cálculo de distância). */
     @Transactional(readOnly = true)
     public String getTenantOriginAddress(UUID deliveryId) {
         Delivery delivery = findDeliveryOrThrow(deliveryId);

@@ -14,8 +14,9 @@ import java.util.UUID;
         indexes = {
                 @Index(name = "idx_stock_movement_product", columnList = "product_id"),
                 @Index(name = "idx_stock_movement_tenant", columnList = "tenant_id"),
-                @Index(name = "idx_stock_movement_created", columnList = "created_at"),
-                @Index(name = "idx_stock_movement_product_created", columnList = "product_id, created_at")
+                @Index(name = "idx_stock_movement_tenant_created", columnList = "tenant_id, created_at"),
+                @Index(name = "idx_stock_movement_product_created", columnList = "product_id, created_at"),
+                @Index(name = "idx_stock_movement_sale", columnList = "sale_id")
         }
 )
 @Getter

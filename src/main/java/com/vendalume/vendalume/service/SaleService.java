@@ -43,6 +43,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Serviço de gestão de vendas.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
 @Service
 @RequiredArgsConstructor
 public class SaleService {
@@ -77,6 +84,7 @@ public class SaleService {
                 .status(status)
                 .saleType(request.getSaleType())
                 .sellerId(sellerId)
+                .registerId(request.getRegisterId() != null ? request.getRegisterId().toString() : null)
                 .customerId(resolveCustomerIdForCreate(request.getCustomerId(), tenantId))
                 .customerName(request.getCustomerName() != null ? request.getCustomerName().trim() : null)
                 .customerDocument(request.getCustomerDocument() != null ? request.getCustomerDocument().trim() : null)
@@ -203,6 +211,11 @@ public class SaleService {
                     .orElseThrow(() -> new ResourceNotFoundException("Venda", id));
         }
         return toResponse(sale);
+    }
+
+    @Transactional(readOnly = true)
+    public List<SaleResponse> toResponseList(List<Sale> sales) {
+        return sales == null ? List.of() : sales.stream().map(this::toResponse).toList();
     }
 
     @Transactional(readOnly = true)

@@ -13,6 +13,13 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
+/**
+ * DTO de requisição para criar conta a pagar.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
 @Data
 @Builder
 @NoArgsConstructor
@@ -38,7 +45,6 @@ public class AccountPayableCreateRequest {
 
     private UUID supplierId;
 
-    /** ID do tenant (obrigatório para root ao criar) */
     private UUID tenantId;
 
     private String notes;

@@ -31,6 +31,10 @@ import java.util.UUID;
 
 /**
  * Serviço para geração de relatórios de contas a pagar e contas a receber em Excel e PDF.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
  */
 @Service
 @RequiredArgsConstructor
@@ -42,8 +46,6 @@ public class CostControlReportService {
     private final CostControlService costControlService;
     private final TenantRepository tenantRepository;
     private final TemplateEngine templateEngine;
-
-    // --- Contas a Pagar ---
 
     public byte[] generatePayablesExcel(UUID requestTenantId, AccountPayableFilterRequest filter) {
         List<AccountPayableResponse> list = costControlService.getPayablesForReport(requestTenantId, filter);
@@ -83,8 +85,6 @@ public class CostControlReportService {
                 list.stream().map(AccountPayableResponse::getPaidAmount).filter(a -> a != null).reduce(BigDecimal.ZERO, BigDecimal::add)
         );
     }
-
-    // --- Contas a Receber ---
 
     public byte[] generateReceivablesExcel(UUID requestTenantId, AccountReceivableFilterRequest filter) {
         List<AccountReceivableResponse> list = costControlService.getReceivablesForReport(requestTenantId, filter);

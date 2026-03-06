@@ -10,14 +10,20 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Interface de repositório para operações de persistência da entidade {@link TableOrderItem}.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
 @Repository
 public interface TableOrderItemRepository extends JpaRepository<TableOrderItem, UUID> {
 
     @Query(value = """
-            SELECT i.* FROM table_order_item i
-            INNER JOIN table_order o ON i.order_id = o.id
-            WHERE i.order_id = CAST(:orderId AS UUID)
-            ORDER BY i.item_order ASC, i.id ASC
+            SELECT * FROM table_order_item
+            WHERE order_id = CAST(:orderId AS UUID)
+            ORDER BY item_order ASC, id ASC
             """, nativeQuery = true)
     List<TableOrderItem> findByOrderIdOrderByItemOrderAsc(@Param("orderId") UUID orderId);
 

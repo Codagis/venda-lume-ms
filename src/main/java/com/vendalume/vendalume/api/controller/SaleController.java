@@ -1,5 +1,7 @@
 package com.vendalume.vendalume.api.controller;
 
+import com.vendalume.vendalume.api.documentation.ApiDocumentedController;
+import com.vendalume.vendalume.api.documentation.DefaultApiResponses;
 import com.vendalume.vendalume.api.dto.product.PageResponse;
 import com.vendalume.vendalume.api.dto.sale.SaleCreateRequest;
 import com.vendalume.vendalume.api.dto.sale.SaleFilterRequest;
@@ -20,12 +22,23 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Controller de vendas.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
+@Tag(name = ApiDocumentedController.TAG_SALES, description = "Vendas, cupons fiscais, NF-e e relatórios")
+@DefaultApiResponses
 @RestController
 @RequestMapping("/sales")
 @RequiredArgsConstructor
@@ -38,26 +51,26 @@ public class SaleController {
     private final SaleFiscalNfeService saleFiscalNfeService;
     private final SaleReportService saleReportService;
 
+    @Operation(summary = "Criar venda")
     @PostMapping
     public ResponseEntity<SaleResponse> create(@Valid @RequestBody SaleCreateRequest request) {
         SaleResponse response = saleService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @Operation(summary = "Buscar venda por ID")
     @GetMapping("/{id}")
     public ResponseEntity<SaleResponse> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(saleService.getById(id));
     }
 
+    @Operation(summary = "Obter histórico de auditoria da venda")
     @GetMapping("/{id}/audit")
     public ResponseEntity<List<SaleAuditResponse>> getAudit(@PathVariable UUID id) {
         return ResponseEntity.ok(saleService.getAudit(id));
     }
 
-    /**
-     * Atualiza apenas o código de autorização do cartão (vendas com pagamento crédito/débito).
-     * Alteração auditada.
-     */
+    @Operation(summary = "Atualizar código de autorização do cartão")
     @PatchMapping("/{id}/card-authorization")
     public ResponseEntity<SaleResponse> updateCardAuthorization(
             @PathVariable UUID id,
@@ -66,10 +79,7 @@ public class SaleController {
         return ResponseEntity.ok(saleService.updateCardAuthorization(id, cardAuthorization));
     }
 
-    /**
-     * Adiciona o pagamento a uma venda pendente (status OPEN) e conclui a venda.
-     * Após isso o usuário pode gerar cupom fiscal, NF-e e comprovante.
-     */
+    @Operation(summary = "Adicionar pagamento e concluir venda")
     @PatchMapping("/{id}/payment")
     public ResponseEntity<SaleResponse> addPayment(
             @PathVariable UUID id,
@@ -77,9 +87,7 @@ public class SaleController {
         return ResponseEntity.ok(saleService.addPayment(id, request));
     }
 
-    /**
-     * Atualiza cliente da venda (nome e CPF/CNPJ). Alteração auditada.
-     */
+    @Operation(summary = "Atualizar cliente da venda")
     @PatchMapping("/{id}/customer")
     public ResponseEntity<SaleResponse> updateCustomer(
             @PathVariable UUID id,
@@ -87,6 +95,7 @@ public class SaleController {
         return ResponseEntity.ok(saleService.updateSaleCustomer(id, request));
     }
 
+    @Operation(summary = "Buscar vendas com filtros")
     @PostMapping("/search")
     public ResponseEntity<PageResponse<SaleResponse>> search(
             @RequestParam(required = false) UUID tenantId,
@@ -94,6 +103,7 @@ public class SaleController {
         return ResponseEntity.ok(saleService.search(tenantId, filter));
     }
 
+    @Operation(summary = "Obter resumo de vendas")
     @PostMapping("/summary")
     public ResponseEntity<SaleSummaryResponse> getSummary(
             @RequestParam(required = false) UUID tenantId,
@@ -101,6 +111,7 @@ public class SaleController {
         return ResponseEntity.ok(saleService.getSummary(tenantId, filter));
     }
 
+    @Operation(summary = "Baixar cupom fiscal em PDF")
     @GetMapping(value = "/{id}/receipt.pdf", produces = MediaType.APPLICATION_PDF_VALUE)
     public ResponseEntity<byte[]> getReceiptPdf(@PathVariable UUID id) {
         byte[] pdf = saleReceiptPdfService.generateReceiptPdf(id);
@@ -109,6 +120,7 @@ public class SaleController {
                 .body(pdf);
     }
 
+    @Operation(summary = "Baixar comprovante simples em PDF")
     @GetMapping(value = "/{id}/simple-receipt.pdf", produces = MediaType.APPLICATION_PDF_VALUE)
     public ResponseEntity<byte[]> getSimpleReceiptPdf(@PathVariable UUID id) {
         byte[] pdf = saleSimpleReceiptPdfService.generateSimpleReceiptPdf(id);
@@ -117,10 +129,7 @@ public class SaleController {
                 .body(pdf);
     }
 
-    /**
-     * Emite NFC-e (cupom fiscal completo) via Fiscal Simplify e retorna o PDF oficial da SEFAZ.
-     * Requer empresa cadastrada no Fiscal Simplify (CNPJ, código município, IE).
-     */
+    @Operation(summary = "Emitir NFC-e e baixar cupom fiscal oficial")
     @GetMapping(value = "/{id}/fiscal-receipt.pdf", produces = MediaType.APPLICATION_PDF_VALUE)
     public ResponseEntity<byte[]> getFiscalReceiptPdf(@PathVariable UUID id) {
         byte[] pdf = saleFiscalNfceService.emitirNfceEPdf(id);
@@ -129,9 +138,7 @@ public class SaleController {
                 .body(pdf);
     }
 
-    /**
-     * Emite NF-e (Nota Fiscal Eletrônica) via Fiscal Simplify, grava chave/número na venda e retorna o PDF (DANFE).
-     */
+    @Operation(summary = "Emitir NF-e e baixar DANFE em PDF")
     @GetMapping(value = "/{id}/nfe.pdf", produces = MediaType.APPLICATION_PDF_VALUE)
     public ResponseEntity<byte[]> getNfePdf(@PathVariable UUID id) {
         byte[] pdf = saleFiscalNfeService.emitirNfeEPdf(id);
@@ -140,9 +147,7 @@ public class SaleController {
                 .body(pdf);
     }
 
-    /**
-     * Exporta relatório de vendas em Excel (XLS) conforme filtros.
-     */
+    @Operation(summary = "Exportar relatório de vendas em Excel")
     @PostMapping("/report/excel")
     public ResponseEntity<byte[]> exportReportExcel(
             @RequestParam(required = false) UUID tenantId,
@@ -155,9 +160,7 @@ public class SaleController {
                 .body(content);
     }
 
-    /**
-     * Exporta relatório de vendas em PDF conforme filtros (layout profissional com logo da empresa).
-     */
+    @Operation(summary = "Exportar relatório de vendas em PDF")
     @PostMapping("/report/pdf")
     public ResponseEntity<byte[]> exportReportPdf(
             @RequestParam(required = false) UUID tenantId,
@@ -169,6 +172,7 @@ public class SaleController {
                 .body(content);
     }
 
+    @Operation(summary = "Cancelar venda")
     @PostMapping("/{id}/cancel")
     public ResponseEntity<SaleResponse> cancel(
             @PathVariable UUID id,

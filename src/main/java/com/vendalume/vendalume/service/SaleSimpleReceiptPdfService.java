@@ -23,6 +23,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+/**
+ * Serviço para geração de cupom simplificado em PDF.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
 @Service
 @RequiredArgsConstructor
 public class SaleSimpleReceiptPdfService {

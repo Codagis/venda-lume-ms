@@ -19,6 +19,13 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * Serviço de gestão de perfis de acesso.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
 @Service
 @RequiredArgsConstructor
 public class ProfileService {
@@ -31,13 +38,11 @@ public class ProfileService {
             return requestTenantId;
         }
         return SecurityUtils.requireTenantId();
-        // Se não for root, ignora requestTenantId e usa o do usuário
     }
 
     @Transactional(readOnly = true)
     public List<ProfileResponse> listByTenant(UUID tenantId) {
         if (SecurityUtils.isCurrentUserRoot() && tenantId == null) {
-            // Root sem filtro: retorna TODOS os perfis (sistema + empresas)
             return profileRepository.findAllByOrderByNameAsc().stream().map(this::toResponse).toList();
         }
         UUID effectiveTenantId = resolveTenantId(tenantId);

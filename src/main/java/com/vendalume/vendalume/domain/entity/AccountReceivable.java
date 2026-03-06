@@ -23,7 +23,8 @@ import java.util.UUID;
     @Index(name = "idx_ar_tenant_status", columnList = "tenant_id, status"),
     @Index(name = "idx_ar_tenant_due_date", columnList = "tenant_id, due_date"),
     @Index(name = "idx_ar_customer", columnList = "customer_id"),
-    @Index(name = "idx_ar_sale", columnList = "sale_id")
+    @Index(name = "idx_ar_sale", columnList = "sale_id"),
+    @Index(name = "idx_ar_created_at", columnList = "created_at")
 })
 @Getter
 @Setter

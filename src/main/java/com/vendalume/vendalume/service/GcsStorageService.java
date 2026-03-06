@@ -18,9 +18,10 @@ import java.util.UUID;
 
 /**
  * Serviço de upload de arquivos para o Google Cloud Storage.
- * Usado para logo de empresa, fotos de produto, etc.
  *
  * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
  */
 @Slf4j
 @Service

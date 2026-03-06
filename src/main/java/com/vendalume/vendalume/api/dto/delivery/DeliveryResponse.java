@@ -13,6 +13,13 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+/**
+ * DTO de resposta com dados da entrega.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
 @Data
 @Builder
 @NoArgsConstructor

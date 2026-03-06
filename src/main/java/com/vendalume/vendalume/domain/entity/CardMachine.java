@@ -3,6 +3,7 @@ package com.vendalume.vendalume.domain.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,7 +16,10 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 @Entity
-@Table(name = "card_machines")
+@Table(name = "card_machines", indexes = {
+        @Index(name = "idx_card_machine_tenant", columnList = "tenant_id"),
+        @Index(name = "idx_card_machine_tenant_active", columnList = "tenant_id, active")
+})
 @Getter
 @Setter
 @NoArgsConstructor

@@ -89,4 +89,17 @@ public interface SaleRepository extends JpaRepository<Sale, UUID>, JpaSpecificat
     @Query(value = "SELECT COUNT(*) FROM sales WHERE tenant_id = CAST(:tenantId AS UUID)", nativeQuery = true)
     long countByTenantId(@Param("tenantId") UUID tenantId);
 
+    @Query(value = """
+            SELECT * FROM sales
+            WHERE tenant_id = CAST(:tenantId AS UUID)
+            AND register_id = :registerId AND seller_id = CAST(:sellerId AS UUID)
+            AND sale_date >= :fromDate AND sale_date <= :toDate
+            ORDER BY sale_date ASC
+            """, nativeQuery = true)
+    List<Sale> findByTenantIdAndRegisterIdAndSellerIdAndSaleDateBetween(
+            @Param("tenantId") UUID tenantId,
+            @Param("registerId") String registerId,
+            @Param("sellerId") UUID sellerId,
+            @Param("fromDate") LocalDateTime fromDate,
+            @Param("toDate") LocalDateTime toDate);
 }

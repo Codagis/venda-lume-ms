@@ -14,6 +14,13 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+/**
+ * DTO de resposta com métricas do mapa de entrega.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Schema(description = "Métricas de distância e tempo da entrega")
 public class DeliveryMapMetricsResponse {

@@ -1,10 +1,14 @@
 package com.vendalume.vendalume.api.controller;
 
+import com.vendalume.vendalume.api.documentation.DefaultApiResponses;
 import com.vendalume.vendalume.api.dto.register.AssignOperatorsRequest;
 import com.vendalume.vendalume.api.dto.register.CashierOption;
 import com.vendalume.vendalume.api.dto.register.RegisterRequest;
 import com.vendalume.vendalume.api.dto.register.RegisterResponse;
+import com.vendalume.vendalume.api.dto.register.RegisterSessionDetailResponse;
+import com.vendalume.vendalume.api.dto.register.RegisterSessionResponse;
 import com.vendalume.vendalume.service.RegisterService;
+import com.vendalume.vendalume.service.RegisterSessionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -15,6 +19,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Controller de pontos de venda (caixas) e atribuição de operadores.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
+@DefaultApiResponses
 @RestController
 @RequestMapping("/registers")
 @RequiredArgsConstructor
@@ -22,6 +34,7 @@ import java.util.UUID;
 public class RegisterController {
 
     private final RegisterService registerService;
+    private final RegisterSessionService registerSessionService;
 
     @GetMapping
     @Operation(summary = "Listar pontos de venda")
@@ -81,5 +94,37 @@ public class RegisterController {
     @Operation(summary = "Listar operadores de caixa (usuários com perfil Caixa/Operador)")
     public ResponseEntity<List<CashierOption>> listCashiers(@RequestParam(required = false) UUID tenantId) {
         return ResponseEntity.ok(registerService.listCashiersByTenant(tenantId));
+    }
+
+    @PostMapping("/{id}/session/start")
+    @Operation(summary = "Iniciar sessão do PDV (auditoria)")
+    public ResponseEntity<RegisterSessionResponse> startSession(
+            @PathVariable UUID id,
+            @RequestParam(required = false) UUID tenantId) {
+        return ResponseEntity.ok(registerSessionService.startSession(id, tenantId));
+    }
+
+    @PostMapping("/{id}/session/end")
+    @Operation(summary = "Encerrar sessão do PDV")
+    public ResponseEntity<RegisterSessionResponse> endSession(
+            @PathVariable UUID id,
+            @RequestParam(required = false) UUID tenantId) {
+        return ResponseEntity.ok(registerSessionService.endSession(id, tenantId));
+    }
+
+    @GetMapping("/{id}/sessions")
+    @Operation(summary = "Listar histórico de sessões do caixa")
+    public ResponseEntity<List<RegisterSessionResponse>> listSessions(
+            @PathVariable UUID id,
+            @RequestParam(required = false) UUID tenantId) {
+        return ResponseEntity.ok(registerSessionService.listSessionsByRegister(id, tenantId));
+    }
+
+    @GetMapping("/sessions/{sessionId}")
+    @Operation(summary = "Detalhe da sessão do PDV com vendas")
+    public ResponseEntity<RegisterSessionDetailResponse> getSessionDetail(
+            @PathVariable UUID sessionId,
+            @RequestParam(required = false) UUID tenantId) {
+        return ResponseEntity.ok(registerSessionService.getSessionDetail(sessionId, tenantId));
     }
 }

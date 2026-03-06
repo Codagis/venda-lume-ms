@@ -1,5 +1,6 @@
 package com.vendalume.vendalume.api.controller;
 
+import com.vendalume.vendalume.api.documentation.DefaultApiResponses;
 import com.vendalume.vendalume.api.dto.tenant.TenantRequest;
 import com.vendalume.vendalume.api.dto.tenant.TenantResponse;
 import com.vendalume.vendalume.service.TenantService;
@@ -14,6 +15,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Controller de empresas (tenants).
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
+@DefaultApiResponses
 @RestController
 @RequestMapping("/tenants")
 @RequiredArgsConstructor

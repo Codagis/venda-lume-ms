@@ -12,15 +12,18 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import java.util.Map;
 
 /**
- * Cliente HTTP para integração com a API Fiscal Simplify (Fiscalimplify).
- * Responsável por cadastrar empresas e emitir NFC-e (cupom fiscal).
+ * Cliente HTTP para integração com a API Fiscal Simplify.
  *
  * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
  */
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class FiscalSimplifyClient {
+
+    private static final String API_KEY_HEADER = "X-API-Key";
 
     private final WebClient.Builder webClientBuilder;
 
@@ -30,16 +33,19 @@ public class FiscalSimplifyClient {
     @Value("${vendalume.fiscal-simplify.enabled:true}")
     private boolean enabled;
 
+    @Value("${vendalume.fiscal-simplify.api-key:}")
+    private String apiKey;
+
     private WebClient client() {
-        return webClientBuilder
+        var builder = webClientBuilder
                 .baseUrl(baseUrl)
-                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .build();
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+        if (apiKey != null && !apiKey.isBlank()) {
+            builder.defaultHeader(API_KEY_HEADER, apiKey.trim());
+        }
+        return builder.build();
     }
 
-    /**
-     * Verifica se a empresa existe no Fiscal Simplify pelo CNPJ.
-     */
     public boolean companyExistsByCnpj(String cnpj) {
         if (!enabled) return false;
         String cnpjLimpo = cnpj != null ? cnpj.replaceAll("\\D", "") : "";
@@ -59,11 +65,6 @@ public class FiscalSimplifyClient {
         }
     }
 
-    /**
-     * Cadastra empresa no Fiscal Simplify.
-     *
-     * @return ID da empresa cadastrada ou null em caso de erro
-     */
     public String createCompany(Map<String, Object> companyRequest) {
         if (!enabled) {
             log.debug("Fiscal Simplify desabilitado - não cadastrando empresa");
@@ -90,9 +91,6 @@ public class FiscalSimplifyClient {
         }
     }
 
-    /**
-     * Configura NFC-e na empresa (PUT /companies/{cnpj}/nfce/config).
-     */
     public void configurarNfce(String cnpj, Map<String, Object> nfcConfig) {
         if (!enabled) return;
         String cnpjLimpo = cnpj != null ? cnpj.replaceAll("\\D", "") : "";
@@ -111,9 +109,6 @@ public class FiscalSimplifyClient {
         }
     }
 
-    /**
-     * Configura NF-e na empresa (PUT /companies/{cnpj}/nfe/config).
-     */
     public void configurarNfe(String cnpj, Map<String, Object> nfeConfig) {
         if (!enabled) return;
         String cnpjLimpo = cnpj != null ? cnpj.replaceAll("\\D", "") : "";
@@ -132,9 +127,6 @@ public class FiscalSimplifyClient {
         }
     }
 
-    /**
-     * Cadastra certificado digital A1 (PFX) na empresa.
-     */
     public void cadastrarCertificado(String cnpj, String certificadoBase64, String password) {
         if (!enabled) return;
         String cnpjLimpo = cnpj != null ? cnpj.replaceAll("\\D", "") : "";
@@ -157,9 +149,6 @@ public class FiscalSimplifyClient {
         }
     }
 
-    /**
-     * Atualiza empresa no Fiscal Simplify (PATCH).
-     */
     public void updateCompany(String cnpj, Map<String, Object> updateRequest) {
         if (!enabled) return;
         String cnpjLimpo = cnpj != null ? cnpj.replaceAll("\\D", "") : "";
@@ -176,11 +165,6 @@ public class FiscalSimplifyClient {
         }
     }
 
-    /**
-     * Emite NFC-e (cupom fiscal) no Fiscal Simplify.
-     *
-     * @return Map com resposta (contém "id" da NFC-e autorizada)
-     */
     @SuppressWarnings("unchecked")
     public Map<String, Object> emitirNfce(Map<String, Object> nfceRequest) {
         if (!enabled) {
@@ -203,12 +187,6 @@ public class FiscalSimplifyClient {
         }
     }
 
-    /**
-     * Obtém o PDF da NFC-e emitida.
-     *
-     * @param nfceId ID retornado pela emissão
-     * @return bytes do PDF
-     */
     public byte[] getNfcePdf(String nfceId) {
         if (!enabled) {
             throw new IllegalStateException("Fiscal Simplify está desabilitado.");
@@ -230,11 +208,6 @@ public class FiscalSimplifyClient {
         }
     }
 
-    /**
-     * Emite NF-e (Nota Fiscal Eletrônica) no Fiscal Simplify.
-     *
-     * @return Map com resposta (contém "id" da NF-e autorizada e opcionalmente "chave", "numero")
-     */
     @SuppressWarnings("unchecked")
     public Map<String, Object> emitirNfe(Map<String, Object> nfeRequest) {
         if (!enabled) {
@@ -257,12 +230,6 @@ public class FiscalSimplifyClient {
         }
     }
 
-    /**
-     * Obtém o PDF da NF-e emitida (DANFE).
-     *
-     * @param nfeId ID retornado pela emissão
-     * @return bytes do PDF
-     */
     public byte[] getNfePdf(String nfeId) {
         if (!enabled) {
             throw new IllegalStateException("Fiscal Simplify está desabilitado.");

@@ -24,7 +24,10 @@ import java.util.UUID;
 
 /**
  * Serviço para geração da conta (comprovante de consumo) para o cliente.
- * Layout similar ao comprovante de venda, com todos os itens consumidos detalhados.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
  */
 @Service
 @RequiredArgsConstructor

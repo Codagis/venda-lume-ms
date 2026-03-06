@@ -24,6 +24,13 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * Serviço de gestão de mesas e seções.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
 @Service
 @RequiredArgsConstructor
 public class TableService {
@@ -32,8 +39,6 @@ public class TableService {
     private static final List<String> TABLE_SORT_FIELDS = List.of("name", "capacity", "status", "createdAt");
     private final TableSectionRepository tableSectionRepository;
     private final RestaurantTableRepository restaurantTableRepository;
-
-    // ---------- TableSection CRUD ----------
 
     @Transactional
     public TableSectionResponse createSection(TableSectionCreateRequest request) {
@@ -109,8 +114,6 @@ public class TableService {
         tableSectionRepository.delete(section);
     }
 
-    // ---------- RestaurantTable CRUD ----------
-
     @Transactional
     public RestaurantTableResponse createTable(RestaurantTableCreateRequest request) {
         UUID tenantId = resolveTenantIdForCreate(request.getTenantId());
@@ -184,8 +187,6 @@ public class TableService {
         RestaurantTable table = findTableEntity(id);
         restaurantTableRepository.delete(table);
     }
-
-    // ---------- Helpers ----------
 
     private UUID resolveTenantIdForCreate(UUID requestTenantId) {
         if (SecurityUtils.isCurrentUserRoot()) {

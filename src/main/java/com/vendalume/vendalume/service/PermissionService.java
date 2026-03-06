@@ -13,6 +13,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Serviço de gestão de permissões.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
 @Service
 @RequiredArgsConstructor
 public class PermissionService {
@@ -25,7 +32,6 @@ public class PermissionService {
         }
     }
 
-    /** Lista todas as permissões (qualquer usuário autenticado pode ver, para montar perfis). */
     @Transactional(readOnly = true)
     public List<PermissionResponse> listAll() {
         return permissionRepository.findAllByOrderByModuleAscCodeAsc().stream()

@@ -35,6 +35,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
+    private final CookieAuthHelper cookieAuthHelper;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
@@ -67,6 +68,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private String extractJwtFromRequest(HttpServletRequest request) {
+        String fromCookie = cookieAuthHelper.getAccessTokenFromCookie(request);
+        if (StringUtils.hasText(fromCookie)) {
+            return fromCookie;
+        }
         String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
             return bearerToken.substring(BEARER_PREFIX.length());

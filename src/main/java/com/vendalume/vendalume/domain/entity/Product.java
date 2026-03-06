@@ -46,7 +46,8 @@ import java.util.UUID;
                 @Index(name = "idx_product_featured", columnList = "featured"),
                 @Index(name = "idx_product_display_order", columnList = "display_order"),
                 @Index(name = "idx_product_created_at", columnList = "created_at"),
-                @Index(name = "idx_product_brand", columnList = "brand")
+                @Index(name = "idx_product_brand", columnList = "brand"),
+                @Index(name = "idx_product_tenant_category_active", columnList = "tenant_id, category_id, active")
         },
         uniqueConstraints = {
                 @UniqueConstraint(name = "uk_product_tenant_sku", columnNames = {"tenant_id", "sku"})

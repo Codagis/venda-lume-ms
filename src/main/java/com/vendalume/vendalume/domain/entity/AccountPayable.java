@@ -15,7 +15,8 @@ import java.util.UUID;
 @Table(name = "account_payable", indexes = {
     @Index(name = "idx_ap_tenant_status", columnList = "tenant_id, status"),
     @Index(name = "idx_ap_tenant_due_date", columnList = "tenant_id, due_date"),
-    @Index(name = "idx_ap_supplier", columnList = "supplier_id")
+    @Index(name = "idx_ap_supplier", columnList = "supplier_id"),
+    @Index(name = "idx_ap_created_at", columnList = "created_at")
 })
 @Getter
 @Setter

@@ -12,6 +12,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Interface de repositório para operações de persistência da entidade {@link RestaurantTable}.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
 @Repository
 public interface RestaurantTableRepository extends JpaRepository<RestaurantTable, UUID>, JpaSpecificationExecutor<RestaurantTable> {
 
@@ -24,5 +31,6 @@ public interface RestaurantTableRepository extends JpaRepository<RestaurantTable
     @Query(value = "SELECT * FROM restaurant_table WHERE tenant_id = CAST(:tenantId AS UUID) AND section_id = CAST(:sectionId AS UUID) ORDER BY name ASC", nativeQuery = true)
     List<RestaurantTable> findByTenantIdAndSectionIdOrderByNameAsc(@Param("tenantId") UUID tenantId, @Param("sectionId") UUID sectionId);
 
-    long countBySectionId(UUID sectionId);
+    @Query(value = "SELECT COUNT(*) FROM restaurant_table WHERE section_id = CAST(:sectionId AS UUID)", nativeQuery = true)
+    long countBySectionId(@Param("sectionId") UUID sectionId);
 }

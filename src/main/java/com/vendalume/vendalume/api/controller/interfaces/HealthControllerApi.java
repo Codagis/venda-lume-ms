@@ -1,4 +1,4 @@
-package com.vendalume.vendalume.api.controller;
+package com.vendalume.vendalume.api.controller.interfaces;
 
 import com.vendalume.vendalume.api.documentation.ApiDocumentedController;
 import com.vendalume.vendalume.api.documentation.DefaultApiResponses;
@@ -13,8 +13,6 @@ import java.util.Map;
 
 /**
  * Interface do controller de health check.
- * Contém as anotações de endpoint e assinaturas dos métodos.
- * O controller deve usar @RequestMapping("/health").
  *
  * @author VendaLume
  * @version 1.0.0

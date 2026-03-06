@@ -17,6 +17,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Serviço de gestão de empresas (tenants).
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
 @Service
 @RequiredArgsConstructor
 public class TenantService {
@@ -103,7 +110,6 @@ public class TenantService {
             fiscalSimplifyService.syncTenantToFiscalSimplify(tenant,
                     request.getCertificadoPfxBase64(), request.getCertificadoPassword());
         } catch (Exception e) {
-            // Log mas não falha o cadastro - empresa salva no Venda Lume
         }
         return toResponse(tenant);
     }
@@ -164,7 +170,6 @@ public class TenantService {
             fiscalSimplifyService.syncTenantToFiscalSimplify(tenant,
                     request.getCertificadoPfxBase64(), request.getCertificadoPassword());
         } catch (Exception e) {
-            // Log mas não falha a atualização
         }
         return toResponse(tenant);
     }
@@ -182,7 +187,6 @@ public class TenantService {
             tenant.setCertificadoUploadedAt(Instant.now());
             tenantRepository.save(tenant);
         } catch (Exception e) {
-            // Log mas não falha o cadastro/edição
             org.slf4j.LoggerFactory.getLogger(TenantService.class).warn("Falha ao enviar certificado ao Google Cloud: {}", e.getMessage());
         }
     }

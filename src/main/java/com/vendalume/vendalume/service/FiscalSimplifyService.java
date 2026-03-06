@@ -23,10 +23,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Serviço que integra Venda Lume com Fiscal Simplify.
- * Mapeia Tenant para empresa fiscal e Sale para NFC-e.
+ * Serviço de integração com Fiscal Simplify.
  *
  * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
  */
 @Service
 @RequiredArgsConstructor

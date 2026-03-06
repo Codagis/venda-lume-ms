@@ -4,9 +4,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 /**
- * Propriedades para integração com Google Cloud Storage (uploads de imagens).
+ * Propriedades para integração com Google Cloud Storage.
  *
  * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
  */
 @Component
 @ConfigurationProperties(prefix = "vendalume.gcs")
@@ -15,9 +17,7 @@ public class GcsProperties {
     private boolean enabled = false;
     private String bucketName = "";
     private String projectId = "";
-    /** Caminho do arquivo JSON da conta de serviço (alternativa a credentialsJson). */
     private String credentialsPath = "";
-    /** JSON completo da chave da conta de serviço (uma única string). Prioridade sobre credentialsPath. */
     private String credentialsJson = "";
 
     public boolean isEnabled() {

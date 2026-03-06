@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Comment;
 
 import java.util.HashSet;
@@ -46,6 +47,7 @@ public class Profile extends BaseAuditableEntity {
     @Column(name = "description", length = 500)
     private String description;
 
+    @BatchSize(size = 16)
     @Comment("Permissões do perfil")
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(

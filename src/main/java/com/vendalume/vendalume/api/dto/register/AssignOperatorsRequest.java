@@ -7,6 +7,13 @@ import lombok.Data;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * DTO de requisição para atribuir operadores ao caixa.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
 @Data
 @Schema(description = "Lista de IDs de usuários para atribuir como operadores do caixa")
 public class AssignOperatorsRequest {

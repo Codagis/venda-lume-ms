@@ -24,7 +24,10 @@ import java.util.UUID;
 
 /**
  * Serviço para geração do comprovante de comanda para cozinha em PDF.
- * Layout similar ao comprovante de venda, com detalhes do pedido e observações.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
  */
 @Service
 @RequiredArgsConstructor

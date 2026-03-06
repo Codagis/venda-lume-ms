@@ -24,7 +24,6 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ProductCreateRequest {
 
-    /** Obrigatório quando usuário é root; ignora quando não root. */
     private UUID tenantId;
 
     @NotBlank(message = "SKU é obrigatório")

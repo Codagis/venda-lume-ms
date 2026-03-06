@@ -4,6 +4,7 @@ import com.vendalume.vendalume.domain.enums.OrderStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Comment;
 
 import java.time.Instant;
@@ -23,7 +24,9 @@ import java.util.UUID;
     @Index(name = "idx_table_order_tenant", columnList = "tenant_id"),
     @Index(name = "idx_table_order_table", columnList = "table_id"),
     @Index(name = "idx_table_order_tenant_status", columnList = "tenant_id, status"),
-    @Index(name = "idx_table_order_sale", columnList = "sale_id")
+    @Index(name = "idx_table_order_sale", columnList = "sale_id"),
+    @Index(name = "idx_table_order_opened_at", columnList = "opened_at"),
+    @Index(name = "idx_table_order_created_at", columnList = "created_at")
 })
 @Comment("Comandas (pedidos de mesa)")
 @Getter
@@ -69,6 +72,7 @@ public class TableOrder extends BaseAuditableEntity {
     @Column(name = "notes", length = 500)
     private String notes;
 
+    @BatchSize(size = 16)
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<TableOrderItem> items = new ArrayList<>();

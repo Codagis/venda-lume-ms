@@ -9,6 +9,13 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 
+/**
+ * DTO de requisição de maquininha de cartão.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
 @Data
 @Schema(description = "Dados da maquininha")
 public class CardMachineRequest {

@@ -6,9 +6,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  * Configuração do cliente HTTP para integração com Fiscal Simplify.
- * Fornece WebClient.Builder pois não é auto-configurado em projetos webmvc.
  *
  * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
  */
 @Configuration
 public class FiscalSimplifyConfig {

@@ -8,6 +8,13 @@ import lombok.Data;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * DTO de resposta com registro de auditoria da venda.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
 @Data
 @Builder
 @Schema(description = "Registro de auditoria de uma venda")

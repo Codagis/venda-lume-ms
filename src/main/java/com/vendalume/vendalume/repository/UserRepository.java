@@ -53,25 +53,28 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     @Query(value = "SELECT EXISTS(SELECT 1 FROM users WHERE tenant_id = CAST(:tenantId AS UUID) AND LOWER(username) = LOWER(CAST(:username AS TEXT)))", nativeQuery = true)
     boolean existsByTenantIdAndUsernameIgnoreCase(@Param("tenantId") UUID tenantId, @Param("username") String username);
 
-    List<User> findByTenantIdOrderByUsernameAsc(UUID tenantId);
+    @Query(value = "SELECT * FROM users WHERE tenant_id = CAST(:tenantId AS UUID) ORDER BY username ASC", nativeQuery = true)
+    List<User> findByTenantIdOrderByUsernameAsc(@Param("tenantId") UUID tenantId);
 
-    List<User> findByTenantIdAndRoleAndActiveTrueOrderByFullNameAsc(UUID tenantId, UserRole role);
+    @Query(value = "SELECT * FROM users WHERE tenant_id = CAST(:tenantId AS UUID) AND role = CAST(:role AS TEXT) AND active = true ORDER BY full_name ASC", nativeQuery = true)
+    List<User> findByTenantIdAndRoleAndActiveTrueOrderByFullNameAsc(@Param("tenantId") UUID tenantId, @Param("role") UserRole role);
 
-    List<User> findByTenantIdAndRoleInAndActiveTrueOrderByFullNameAsc(UUID tenantId, Set<UserRole> roles);
+    @Query("SELECT u FROM User u WHERE u.tenantId = :tenantId AND u.role IN :roles AND u.active = true ORDER BY u.fullName ASC")
+    List<User> findByTenantIdAndRoleInAndActiveTrueOrderByFullNameAsc(@Param("tenantId") UUID tenantId, @Param("roles") Set<UserRole> roles);
 
     @Modifying
-    @Query("UPDATE User u SET u.lastLoginAt = :loginAt, u.failedLoginAttempts = 0 WHERE u.id = :userId")
+    @Query(value = "UPDATE users SET last_login_at = :loginAt, failed_login_attempts = 0 WHERE id = CAST(:userId AS UUID)", nativeQuery = true)
     void recordSuccessfulLogin(@Param("userId") UUID userId, @Param("loginAt") Instant loginAt);
 
     @Modifying
-    @Query("UPDATE User u SET u.failedLoginAttempts = u.failedLoginAttempts + 1 WHERE u.id = :userId")
+    @Query(value = "UPDATE users SET failed_login_attempts = failed_login_attempts + 1 WHERE id = CAST(:userId AS UUID)", nativeQuery = true)
     void incrementFailedLoginAttempts(@Param("userId") UUID userId);
 
     @Modifying
-    @Query("UPDATE User u SET u.lockedUntil = :lockedUntil WHERE u.id = :userId")
+    @Query(value = "UPDATE users SET locked_until = :lockedUntil WHERE id = CAST(:userId AS UUID)", nativeQuery = true)
     void lockAccount(@Param("userId") UUID userId, @Param("lockedUntil") Instant lockedUntil);
 
     @Modifying
-    @Query("UPDATE User u SET u.failedLoginAttempts = 0, u.lockedUntil = null WHERE u.id = :userId")
+    @Query(value = "UPDATE users SET failed_login_attempts = 0, locked_until = NULL WHERE id = CAST(:userId AS UUID)", nativeQuery = true)
     void resetLoginAttempts(@Param("userId") UUID userId);
 }

@@ -21,7 +21,10 @@ import org.springframework.context.annotation.Profile;
 
 /**
  * Carrega dados iniciais para ambiente de desenvolvimento.
- * Cria tenant Codagis e usuário admin root: admin / admin123
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
  */
 @Slf4j
 @Configuration

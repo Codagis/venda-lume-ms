@@ -5,6 +5,13 @@ import lombok.Data;
 
 import java.util.UUID;
 
+/**
+ * DTO de requisição para atualizar cliente da venda.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
 @Data
 @Schema(description = "Atualização do cliente da venda (nome e documento). Alteração auditada.")
 public class SaleCustomerUpdateRequest {

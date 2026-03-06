@@ -11,6 +11,13 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+/**
+ * DTO de resposta com dados OSM do mapa de entrega.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Schema(description = "Dados do mapa OSM para exibir localização e métricas de entrega")
 public class DeliveryMapOsmResponse {

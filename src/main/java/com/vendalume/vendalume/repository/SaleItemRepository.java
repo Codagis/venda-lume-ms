@@ -33,10 +33,6 @@ public interface SaleItemRepository extends JpaRepository<SaleItem, UUID> {
             """, nativeQuery = true)
     List<SaleItem> findByProductId(@Param("productId") UUID productId);
 
-    /**
-     * Agrega vendas por produto para um tenant e período.
-     * Retorna: product_id, product_name, total_quantity, total_revenue, sale_count
-     */
     @Query(value = """
             SELECT si.product_id, si.product_name,
                    COALESCE(SUM(si.quantity), 0) as total_quantity,

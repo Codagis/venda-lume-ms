@@ -10,19 +10,28 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Interface de repositório para operações de persistência da entidade {@link Register}.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
 @Repository
 public interface RegisterRepository extends JpaRepository<Register, UUID> {
 
-    @Query("SELECT r FROM Register r WHERE r.tenantId = :tenantId ORDER BY r.name")
+    @Query(value = "SELECT * FROM registers WHERE tenant_id = CAST(:tenantId AS UUID) ORDER BY name ASC", nativeQuery = true)
     List<Register> findByTenantIdOrderByName(@Param("tenantId") UUID tenantId);
 
-    @Query("SELECT r FROM Register r WHERE r.tenantId = :tenantId AND r.active = true ORDER BY r.name")
+    @Query(value = "SELECT * FROM registers WHERE tenant_id = CAST(:tenantId AS UUID) AND active = true ORDER BY name ASC", nativeQuery = true)
     List<Register> findByTenantIdAndActiveTrueOrderByName(@Param("tenantId") UUID tenantId);
 
-    @Query("SELECT r FROM Register r WHERE r.id = :id AND r.tenantId = :tenantId")
+    @Query(value = "SELECT * FROM registers WHERE id = CAST(:id AS UUID) AND tenant_id = CAST(:tenantId AS UUID) LIMIT 1", nativeQuery = true)
     Optional<Register> findByIdAndTenantId(@Param("id") UUID id, @Param("tenantId") UUID tenantId);
 
-    boolean existsByTenantIdAndName(UUID tenantId, String name);
+    @Query(value = "SELECT EXISTS(SELECT 1 FROM registers WHERE tenant_id = CAST(:tenantId AS UUID) AND name = :name)", nativeQuery = true)
+    boolean existsByTenantIdAndName(@Param("tenantId") UUID tenantId, @Param("name") String name);
 
-    boolean existsByTenantIdAndNameAndIdNot(UUID tenantId, String name, UUID id);
+    @Query(value = "SELECT EXISTS(SELECT 1 FROM registers WHERE tenant_id = CAST(:tenantId AS UUID) AND name = :name AND id != CAST(:id AS UUID))", nativeQuery = true)
+    boolean existsByTenantIdAndNameAndIdNot(@Param("tenantId") UUID tenantId, @Param("name") String name, @Param("id") UUID id);
 }

@@ -18,6 +18,12 @@ public class JwtProperties {
     private long accessTokenValidity = 900;
     private long refreshTokenValidity = 604800;
 
+    private String accessTokenCookieName = "vl_at";
+    private String refreshTokenCookieName = "vl_rt";
+    private boolean cookieSecure = false;
+    private String cookieSameSite = "Strict";
+    private String cookiePath = "/api";
+
     public String getSecret() {
         return secret;
     }
@@ -40,5 +46,45 @@ public class JwtProperties {
 
     public void setRefreshTokenValidity(long refreshTokenValidity) {
         this.refreshTokenValidity = refreshTokenValidity;
+    }
+
+    public String getAccessTokenCookieName() {
+        return accessTokenCookieName;
+    }
+
+    public void setAccessTokenCookieName(String accessTokenCookieName) {
+        this.accessTokenCookieName = accessTokenCookieName;
+    }
+
+    public String getRefreshTokenCookieName() {
+        return refreshTokenCookieName;
+    }
+
+    public void setRefreshTokenCookieName(String refreshTokenCookieName) {
+        this.refreshTokenCookieName = refreshTokenCookieName;
+    }
+
+    public boolean isCookieSecure() {
+        return cookieSecure;
+    }
+
+    public void setCookieSecure(boolean cookieSecure) {
+        this.cookieSecure = cookieSecure;
+    }
+
+    public String getCookieSameSite() {
+        return cookieSameSite;
+    }
+
+    public void setCookieSameSite(String cookieSameSite) {
+        this.cookieSameSite = cookieSameSite;
+    }
+
+    public String getCookiePath() {
+        return cookiePath;
+    }
+
+    public void setCookiePath(String cookiePath) {
+        this.cookiePath = cookiePath;
     }
 }

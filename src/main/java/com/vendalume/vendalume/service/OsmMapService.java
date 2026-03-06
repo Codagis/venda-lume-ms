@@ -14,7 +14,10 @@ import java.util.Locale;
 
 /**
  * Serviço para integração com OpenStreetMap (Nominatim + OSRM).
- * 100% gratuito, sem API key. Usa Leaflet no frontend para exibir o mapa.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
  */
 @Service
 @Slf4j

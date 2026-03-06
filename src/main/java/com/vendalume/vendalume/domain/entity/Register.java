@@ -3,6 +3,7 @@ package com.vendalume.vendalume.domain.entity;
 import com.vendalume.vendalume.domain.enums.EquipmentType;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Comment;
 
 import java.util.HashSet;
@@ -59,6 +60,7 @@ public class Register extends BaseAuditableEntity {
     @Builder.Default
     private Boolean active = true;
 
+    @BatchSize(size = 16)
     @OneToMany(mappedBy = "register", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private Set<RegisterOperator> operators = new HashSet<>();

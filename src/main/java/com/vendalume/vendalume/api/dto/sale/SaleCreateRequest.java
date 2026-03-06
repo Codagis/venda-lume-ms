@@ -17,6 +17,13 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * DTO de requisição para criar venda.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
 @Data
 @Builder
 @NoArgsConstructor
@@ -26,6 +33,9 @@ public class SaleCreateRequest {
 
     @Schema(description = "ID da empresa. Obrigatório para root, ignorado para não-root.")
     private UUID tenantId;
+
+    @Schema(description = "ID do caixa (PDV) da sessão em que a venda foi realizada; usado para auditoria.")
+    private UUID registerId;
 
     @NotNull(message = "Tipo de venda é obrigatório")
     @Schema(description = "Tipo da venda (PDV, DELIVERY, etc.)")
