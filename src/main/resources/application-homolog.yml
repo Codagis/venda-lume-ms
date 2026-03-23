@@ -7,6 +7,9 @@ spring:
     hikari:
       maximum-pool-size: 10
       minimum-idle: 5
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 1200000
 
   jpa:
     hibernate:
@@ -22,7 +25,14 @@ spring:
       enabled: false
 
 server:
-  port: ${SERVER_PORT:8080}
+  port: ${PORT:${SERVER_PORT:8080}}
+  # Railway costuma operar com CPU/RAM limitados; compressão pode ajudar no tráfego,
+  # mas mantemos como alternável para ajustar conforme o ambiente.
+  compression:
+    enabled: ${SERVER_COMPRESSION_ENABLED:false}
+    min-response-size: 2048
+  http2:
+    enabled: false
 
 vendalume:
   jwt:
@@ -34,3 +44,10 @@ logging:
   level:
     com.vendalume: INFO
     org.springframework.web: INFO
+
+springdoc:
+  # Para produção/homologação no Railway, Swagger costuma ser desnecessário e gasta recursos.
+  api-docs:
+    enabled: ${SPRINGDOC_ENABLED:false}
+  swagger-ui:
+    enabled: ${SPRINGDOC_ENABLED:false}
