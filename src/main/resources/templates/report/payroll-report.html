@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Folha de Pagamento da Empresa</title>
+
+<style>
+
+@page { size: A4; margin: 10mm; }
+
+body{
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 10px;
+    background: #fff;
+    margin: 0;
+    padding: 0;
+}
+
+.container{
+    width: 100%;
+    max-width: 190mm;
+    margin: 0 auto;
+    background: white;
+    border: 1px solid #000;
+    padding: 15px;
+    box-sizing: border-box;
+}
+
+.header{
+    display: table;
+    width: 100%;
+    border-bottom: 2px solid #000;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.header .empresa{
+    display: table-cell;
+    width: 50%;
+    font-size: 11px;
+    vertical-align: top;
+}
+
+.header .info{
+    display: table-cell;
+    width: 50%;
+    text-align: right;
+    font-size: 11px;
+    vertical-align: top;
+}
+
+.header h1{
+    margin: 0 0 8px 0;
+    font-size: 16px;
+}
+
+table{
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10px;
+}
+
+th, td{
+    border: 1px solid #000;
+    padding: 5px;
+}
+
+th{
+    background: #ececec;
+}
+
+.center{
+    text-align: center;
+}
+
+.right{
+    text-align: right;
+}
+
+tfoot td{
+    font-weight: bold;
+    background: #f5f5f5;
+}
+
+.resumo{
+    margin-top: 20px;
+    width: 100%;
+    max-width: 280px;
+    margin-left: auto;
+}
+
+.resumo td{
+    font-weight: bold;
+    padding: 5px 8px;
+}
+
+.footer-assinaturas{
+    margin-top: 50px;
+    width: 100%;
+}
+
+.footer-assinaturas table{
+    border: none;
+}
+
+.footer-assinaturas td{
+    width: 33.33%;
+    text-align: center;
+    font-size: 11px;
+    border: none;
+    padding-top: 8px;
+    vertical-align: top;
+}
+
+.linha{
+    border-top: 1px solid #000;
+    margin-top: 45px;
+    padding-top: 5px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="header">
+<div class="empresa">
+<strong th:text="${nomeEmpresa}">Empresa Exemplo LTDA</strong><br>
+CNPJ: <span th:text="${empresaCnpj}">12.345.678/0001-99</span><br>
+Endereço: <span th:text="${empresaEndereco}">Rua das Empresas, 123</span>
+</div>
+<div class="info">
+<h1>Folha de Pagamento</h1>
+Competência: <span th:text="${competencia}">Janeiro / 2022</span><br>
+Data de Emissão: <span th:text="${dataEmissao}">31/01/2022</span><br>
+Total de Funcionários: <span th:text="${totalFuncionarios}">5</span>
+</div>
+</div>
+
+
+<table>
+<thead>
+<tr>
+<th rowspan="2">Cód</th>
+<th rowspan="2">Funcionário</th>
+<th rowspan="2">Função</th>
+<th rowspan="2">Salário Base</th>
+<th colspan="3">Proventos</th>
+<th colspan="2">Descontos</th>
+<th rowspan="2">Total Descontos</th>
+<th rowspan="2">Líquido</th>
+</tr>
+<tr>
+<th>Horas Extras</th>
+<th>Adicional</th>
+<th>Total</th>
+<th>INSS</th>
+<th>IRRF</th>
+</tr>
+</thead>
+
+<tbody>
+<tr th:each="row : ${rows}">
+<td class="center" th:text="${row.cod}">0001</td>
+<td th:text="${row.funcionario}">João da Silva</td>
+<td th:text="${row.funcao}">Vigilante</td>
+<td class="right" th:text="${row.salarioBase}">5.000,00</td>
+<td class="right" th:text="${row.horasExtras}">511,20</td>
+<td class="right" th:text="${row.adicional}">1.500,00</td>
+<td class="right" th:text="${row.totalProventos}">7.011,20</td>
+<td class="right" th:text="${row.inss}">820,10</td>
+<td class="right" th:text="${row.irrf}">850,00</td>
+<td class="right" th:text="${row.totalDescontos}">1.670,10</td>
+<td class="right" th:text="${row.liquido}">5.341,10</td>
+</tr>
+</tbody>
+
+<tfoot>
+<tr>
+<td colspan="3">TOTAL GERAL</td>
+<td class="right" th:text="${totalSalarios}">22.700,00</td>
+<td class="right" th:text="${totalHorasExtras}">1.081,20</td>
+<td class="right" th:text="${totalAdicional}">1.500,00</td>
+<td class="right" th:text="${totalProventos}">25.281,20</td>
+<td class="right" th:text="${totalInss}">2.810,10</td>
+<td class="right" th:text="${totalIrrf}">2.180,00</td>
+<td class="right" th:text="${totalDescontos}">4.990,10</td>
+<td class="right" th:text="${totalLiquido}">20.291,10</td>
+</tr>
+</tfoot>
+</table>
+
+
+<table class="resumo">
+<tr>
+<td>Total de Salários</td>
+<td class="right" th:text="${totalSalarios}">22.700,00</td>
+</tr>
+<tr>
+<td>Total de Proventos</td>
+<td class="right" th:text="${totalProventos}">25.281,20</td>
+</tr>
+<tr>
+<td>Total de Descontos</td>
+<td class="right" th:text="${totalDescontos}">4.990,10</td>
+</tr>
+<tr>
+<td>Total Líquido Pago</td>
+<td class="right" th:text="${totalLiquido}">20.291,10</td>
+</tr>
+<tr>
+<td>Total FGTS (8%)</td>
+<td class="right" th:text="${totalFgts}">2.022,49</td>
+</tr>
+</table>
+
+
+<div class="footer-assinaturas">
+<table>
+<tr>
+<td><div class="linha"></div>Departamento de Recursos Humanos</td>
+<td><div class="linha"></div>Responsável Financeiro</td>
+<td><div class="linha"></div>Diretoria / Administração</td>
+</tr>
+</table>
+</div>
+
+</div>
+
+</body>
+</html>

@@ -84,6 +84,9 @@ public class CardMachineService {
                 .acquirerCnpj(acquirerCnpj)
                 .isDefault(Boolean.TRUE.equals(request.getIsDefault()))
                 .active(request.getActive() != null ? request.getActive() : true)
+                .maxInstallments(request.getMaxInstallments())
+                .maxInstallmentsNoInterest(request.getMaxInstallmentsNoInterest())
+                .interestRatePercent(request.getInterestRatePercent())
                 .build();
         if (Boolean.TRUE.equals(m.getIsDefault())) {
             cardMachineRepository.findByTenantIdOrderByIsDefaultDescNameAsc(resolved)
@@ -113,6 +116,9 @@ public class CardMachineService {
         m.setAcquirerCnpj((acquirerCnpj != null && acquirerCnpj.length() == 14) ? acquirerCnpj : null);
         m.setIsDefault(Boolean.TRUE.equals(request.getIsDefault()));
         if (request.getActive() != null) m.setActive(request.getActive());
+        m.setMaxInstallments(request.getMaxInstallments());
+        m.setMaxInstallmentsNoInterest(request.getMaxInstallmentsNoInterest());
+        m.setInterestRatePercent(request.getInterestRatePercent());
         if (Boolean.TRUE.equals(m.getIsDefault())) {
             cardMachineRepository.findByTenantIdOrderByIsDefaultDescNameAsc(resolved)
                     .stream()
@@ -142,6 +148,9 @@ public class CardMachineService {
                 .acquirerCnpj(m.getAcquirerCnpj())
                 .isDefault(m.getIsDefault())
                 .active(m.getActive())
+                .maxInstallments(m.getMaxInstallments())
+                .maxInstallmentsNoInterest(m.getMaxInstallmentsNoInterest())
+                .interestRatePercent(m.getInterestRatePercent())
                 .build();
     }
 }

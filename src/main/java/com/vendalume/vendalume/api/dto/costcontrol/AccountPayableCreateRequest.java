@@ -45,6 +45,14 @@ public class AccountPayableCreateRequest {
 
     private UUID supplierId;
 
+    private UUID employeeId;
+
+    private String payrollReference;
+
+    private UUID contractorId;
+
+    private UUID contractorInvoiceId;
+
     private UUID tenantId;
 
     private String notes;

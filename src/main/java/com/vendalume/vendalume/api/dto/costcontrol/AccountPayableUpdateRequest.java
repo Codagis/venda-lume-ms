@@ -45,5 +45,13 @@ public class AccountPayableUpdateRequest {
 
     private UUID supplierId;
 
+    private UUID employeeId;
+
+    private String payrollReference;
+
+    private UUID contractorId;
+
+    private UUID contractorInvoiceId;
+
     private String notes;
 }

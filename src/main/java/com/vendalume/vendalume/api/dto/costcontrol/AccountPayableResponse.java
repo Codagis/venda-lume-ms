@@ -29,6 +29,14 @@ public class AccountPayableResponse {
     private UUID tenantId;
     private UUID supplierId;
     private String supplierName;
+    private UUID employeeId;
+    private String employeeName;
+    private String payrollReference;
+    private UUID contractorId;
+    private String contractorName;
+    private UUID contractorInvoiceId;
+    /** Indica se a NF do prestador PJ desta conta está anexada (obrigatório para registrar pagamento). */
+    private Boolean contractorInvoiceHasFile;
     private String description;
     private String reference;
     private String category;

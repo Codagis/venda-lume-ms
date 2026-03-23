@@ -5,12 +5,21 @@ import com.vendalume.vendalume.api.dto.product.PageResponse;
 import com.vendalume.vendalume.api.exception.ResourceNotFoundException;
 import com.vendalume.vendalume.domain.entity.AccountPayable;
 import com.vendalume.vendalume.domain.entity.AccountReceivable;
+import com.vendalume.vendalume.domain.entity.Contractor;
 import com.vendalume.vendalume.domain.entity.Customer;
 import com.vendalume.vendalume.domain.entity.Sale;
+import com.vendalume.vendalume.domain.entity.Employee;
 import com.vendalume.vendalume.domain.entity.Supplier;
 import com.vendalume.vendalume.domain.enums.AccountStatus;
 import com.vendalume.vendalume.domain.enums.PaymentMethod;
-import com.vendalume.vendalume.repository.*;
+import com.vendalume.vendalume.repository.AccountPayableRepository;
+import com.vendalume.vendalume.repository.AccountReceivableRepository;
+import com.vendalume.vendalume.repository.ContractorInvoiceRepository;
+import com.vendalume.vendalume.repository.ContractorRepository;
+import com.vendalume.vendalume.repository.CustomerRepository;
+import com.vendalume.vendalume.repository.EmployeeRepository;
+import com.vendalume.vendalume.repository.SaleRepository;
+import com.vendalume.vendalume.repository.SupplierRepository;
 import com.vendalume.vendalume.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -45,6 +54,9 @@ public class CostControlService {
     private final AccountPayableRepository apRepository;
     private final AccountReceivableRepository arRepository;
     private final SupplierRepository supplierRepository;
+    private final EmployeeRepository employeeRepository;
+    private final ContractorRepository contractorRepository;
+    private final ContractorInvoiceRepository contractorInvoiceRepository;
     private final CustomerRepository customerRepository;
     private final SaleRepository saleRepository;
 
@@ -101,6 +113,15 @@ public class CostControlService {
                 .orElseThrow(() -> new ResourceNotFoundException("Conta a pagar", id));
         if (ap.getStatus() == AccountStatus.PAID || ap.getStatus() == AccountStatus.CANCELLED) {
             throw new IllegalArgumentException("Conta já paga ou cancelada.");
+        }
+        if (ap.getContractorId() != null) {
+            if (ap.getContractorInvoiceId() == null) {
+                throw new IllegalArgumentException("Conta vinculada a prestador PJ: é obrigatório ter uma Nota Fiscal da competência. Cadastre a NF do prestador e vincule à conta antes de registrar o pagamento.");
+            }
+            var invoice = contractorInvoiceRepository.findByIdAndTenantId(ap.getContractorInvoiceId(), tenantId).orElse(null);
+            if (invoice == null || invoice.getFileGcsPath() == null || invoice.getFileGcsPath().isBlank()) {
+                throw new IllegalArgumentException("É obrigatório anexar a Nota Fiscal do prestador PJ desta competência antes de registrar o pagamento. Acesse Prestadores PJ e envie o arquivo da NF.");
+            }
         }
         BigDecimal newPaid = (ap.getPaidAmount() != null ? ap.getPaidAmount() : BigDecimal.ZERO).add(request.getAmount());
         if (newPaid.compareTo(ap.getAmount()) > 0) {
@@ -242,6 +263,8 @@ public class CostControlService {
             preds.add(cb.equal(root.get("tenantId"), tenantId));
             if (filter.getStatus() != null) preds.add(cb.equal(root.get("status"), filter.getStatus()));
             if (filter.getSupplierId() != null) preds.add(cb.equal(root.get("supplierId"), filter.getSupplierId()));
+            if (filter.getEmployeeId() != null) preds.add(cb.equal(root.get("employeeId"), filter.getEmployeeId()));
+            if (filter.getContractorId() != null) preds.add(cb.equal(root.get("contractorId"), filter.getContractorId()));
             if (filter.getDueDateFrom() != null) preds.add(cb.greaterThanOrEqualTo(root.get("dueDate"), filter.getDueDateFrom()));
             if (filter.getDueDateTo() != null) preds.add(cb.lessThanOrEqualTo(root.get("dueDate"), filter.getDueDateTo()));
             String search = filter.getSearch() != null ? filter.getSearch().trim() : null;
@@ -282,6 +305,8 @@ public class CostControlService {
         AccountStatus status = computeStatus(req.getAmount(), BigDecimal.ZERO, req.getDueDate());
         return AccountPayable.builder()
                 .tenantId(tenantId).supplierId(req.getSupplierId())
+                .employeeId(req.getEmployeeId()).payrollReference(req.getPayrollReference() != null ? req.getPayrollReference().trim() : null)
+                .contractorId(req.getContractorId()).contractorInvoiceId(req.getContractorInvoiceId())
                 .description(req.getDescription().trim())
                 .reference(req.getReference() != null ? req.getReference().trim() : null)
                 .category(req.getCategory() != null ? req.getCategory().trim() : null)
@@ -298,6 +323,12 @@ public class CostControlService {
         ap.setDueDate(req.getDueDate());
         ap.setAmount(req.getAmount());
         ap.setSupplierId(req.getSupplierId());
+        if (req.getEmployeeId() != null || req.getPayrollReference() != null) {
+            ap.setEmployeeId(req.getEmployeeId());
+            ap.setPayrollReference(req.getPayrollReference() != null ? req.getPayrollReference().trim() : null);
+        }
+        ap.setContractorId(req.getContractorId());
+        ap.setContractorInvoiceId(req.getContractorInvoiceId());
         ap.setNotes(req.getNotes() != null ? req.getNotes().trim() : null);
         ap.setStatus(computeStatus(ap.getAmount(), ap.getPaidAmount(), ap.getDueDate()));
     }
@@ -340,6 +371,23 @@ public class CostControlService {
         return supplierRepository.findById(supplierId).map(Supplier::getName).orElse(null);
     }
 
+    private String employeeName(UUID employeeId) {
+        if (employeeId == null) return null;
+        return employeeRepository.findById(employeeId).map(Employee::getName).orElse(null);
+    }
+
+    private String contractorName(UUID contractorId) {
+        if (contractorId == null) return null;
+        return contractorRepository.findById(contractorId).map(Contractor::getName).orElse(null);
+    }
+
+    private Boolean contractorInvoiceHasFile(UUID tenantId, UUID contractorInvoiceId) {
+        if (tenantId == null || contractorInvoiceId == null) return null;
+        return contractorInvoiceRepository.findByIdAndTenantId(contractorInvoiceId, tenantId)
+                .map(inv -> inv.getFileGcsPath() != null && !inv.getFileGcsPath().isBlank())
+                .orElse(Boolean.FALSE);
+    }
+
     private String customerName(UUID customerId) {
         if (customerId == null) return null;
         return customerRepository.findById(customerId).map(Customer::getName).orElse(null);
@@ -354,6 +402,9 @@ public class CostControlService {
         return AccountPayableResponse.builder()
                 .id(ap.getId()).tenantId(ap.getTenantId()).supplierId(ap.getSupplierId())
                 .supplierName(supplierName(ap.getSupplierId()))
+                .employeeId(ap.getEmployeeId()).employeeName(employeeName(ap.getEmployeeId())).payrollReference(ap.getPayrollReference())
+                .contractorId(ap.getContractorId()).contractorName(contractorName(ap.getContractorId())).contractorInvoiceId(ap.getContractorInvoiceId())
+                .contractorInvoiceHasFile(contractorInvoiceHasFile(ap.getTenantId(), ap.getContractorInvoiceId()))
                 .description(ap.getDescription()).reference(ap.getReference()).category(ap.getCategory())
                 .dueDate(ap.getDueDate()).amount(ap.getAmount()).paidAmount(ap.getPaidAmount())
                 .status(ap.getStatus()).paymentDate(ap.getPaymentDate()).paymentMethod(ap.getPaymentMethod())

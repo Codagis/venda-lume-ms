@@ -57,17 +57,12 @@ public class RegisterSessionService {
         if (!SecurityUtils.isCurrentUserRoot() && !registerOperatorRepository.existsByRegisterIdAndUserId(registerId, userId)) {
             throw new IllegalArgumentException("Usuário não é operador deste caixa.");
         }
-        if (register.getImei() != null && !register.getImei().isBlank() && !SecurityUtils.isCurrentUserRoot()) {
-            String deviceImei = request != null ? request.getDeviceImei() : null;
-            if (deviceImei == null || deviceImei.isBlank() || !register.getImei().trim().equals(deviceImei.trim())) {
-                throw new IllegalArgumentException("Este caixa só pode ser operado no dispositivo vinculado (tablet/equipamento). Você está em outro dispositivo.");
-            }
+        if (register.getAccessPasswordHash() == null || register.getAccessPasswordHash().isBlank()) {
+            throw new IllegalArgumentException("Este caixa não possui senha configurada. Configure a senha em Pontos de Venda.");
         }
-        if (register.getAccessPasswordHash() != null && !register.getAccessPasswordHash().isBlank()) {
-            String pdvPassword = request != null ? request.getPdvPassword() : null;
-            if (pdvPassword == null || pdvPassword.isBlank() || !passwordEncoder.matches(pdvPassword, register.getAccessPasswordHash())) {
-                throw new IllegalArgumentException("Senha do PDV incorreta ou não informada.");
-            }
+        String pdvPassword = request != null ? request.getPdvPassword() : null;
+        if (pdvPassword == null || pdvPassword.isBlank() || !passwordEncoder.matches(pdvPassword, register.getAccessPasswordHash())) {
+            throw new IllegalArgumentException("Senha do PDV incorreta ou não informada.");
         }
         registerSessionRepository.findOpenByRegisterIdAndUserId(registerId, userId).ifPresent(open -> {
             open.setClosedAt(Instant.now());

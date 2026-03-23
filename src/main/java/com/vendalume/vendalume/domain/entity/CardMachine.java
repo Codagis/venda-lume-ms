@@ -59,6 +59,18 @@ public class CardMachine extends BaseAuditableEntity {
     @Column(name = "active", nullable = false)
     private Boolean active = true;
 
+    @Comment("Quantidade máxima de parcelas para cartão de crédito")
+    @Column(name = "max_installments")
+    private Integer maxInstallments;
+
+    @Comment("Quantidade de parcelas sem juros")
+    @Column(name = "max_installments_no_interest")
+    private Integer maxInstallmentsNoInterest;
+
+    @Comment("Taxa de juros ao mês (%) para parcelas com juros")
+    @Column(name = "interest_rate_percent", precision = 8, scale = 4)
+    private BigDecimal interestRatePercent;
+
     @jakarta.persistence.PrePersist
     protected void generateId() {
         if (id == null) id = UUID.randomUUID();

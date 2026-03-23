@@ -46,4 +46,13 @@ public class CardMachineResponse {
 
     @Schema(description = "Ativa")
     private Boolean active;
+
+    @Schema(description = "Quantidade máxima de parcelas")
+    private Integer maxInstallments;
+
+    @Schema(description = "Quantidade de parcelas sem juros")
+    private Integer maxInstallmentsNoInterest;
+
+    @Schema(description = "Taxa de juros ao mês (%)")
+    private BigDecimal interestRatePercent;
 }

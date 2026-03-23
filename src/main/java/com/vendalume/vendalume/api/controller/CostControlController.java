@@ -103,6 +103,16 @@ public class CostControlController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Gerar comprovante de pagamento (PDF) da conta a pagar")
+    @GetMapping("/payables/{id}/payment-receipt")
+    public ResponseEntity<byte[]> getPaymentReceiptPdf(@PathVariable UUID id) {
+        byte[] content = costControlReportService.generatePaymentReceiptPdf(id);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"comprovante-pagamento.pdf\"")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(content);
+    }
+
     @Operation(summary = "Criar conta a receber")
     @PostMapping("/receivables")
     public ResponseEntity<AccountReceivableResponse> createReceivable(@Valid @RequestBody AccountReceivableCreateRequest request) {

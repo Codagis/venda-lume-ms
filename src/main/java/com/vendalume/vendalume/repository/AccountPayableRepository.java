@@ -26,4 +26,13 @@ public interface AccountPayableRepository extends JpaRepository<AccountPayable, 
 
     @Query(value = "SELECT * FROM account_payable WHERE tenant_id = CAST(:tenantId AS UUID) ORDER BY due_date ASC", nativeQuery = true)
     List<AccountPayable> findByTenantIdOrderByDueDateAsc(@Param("tenantId") UUID tenantId);
+
+    @Query(value = "SELECT EXISTS(SELECT 1 FROM account_payable WHERE tenant_id = CAST(:tenantId AS UUID) AND employee_id = CAST(:employeeId AS UUID) AND payroll_reference = :payrollReference)", nativeQuery = true)
+    boolean existsByTenantIdAndEmployeeIdAndPayrollReference(@Param("tenantId") UUID tenantId, @Param("employeeId") UUID employeeId, @Param("payrollReference") String payrollReference);
+
+    @Query(value = "SELECT * FROM account_payable WHERE tenant_id = CAST(:tenantId AS UUID) AND payroll_reference = :payrollReference ORDER BY due_date, description", nativeQuery = true)
+    List<AccountPayable> findByTenantIdAndPayrollReference(@Param("tenantId") UUID tenantId, @Param("payrollReference") String payrollReference);
+
+    @Query(value = "SELECT DISTINCT payroll_reference FROM account_payable WHERE tenant_id = CAST(:tenantId AS UUID) AND payroll_reference IS NOT NULL AND payroll_reference != '' ORDER BY payroll_reference DESC", nativeQuery = true)
+    List<String> findDistinctPayrollReferencesByTenantId(@Param("tenantId") UUID tenantId);
 }

@@ -32,7 +32,11 @@ public class GcsStorageService {
     private static final List<String> ALLOWED_IMAGE_TYPES = Arrays.asList(
             "image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"
     );
+    private static final List<String> ALLOWED_DOCUMENT_TYPES = Arrays.asList(
+            "application/pdf", "application/xml", "text/xml"
+    );
     private static final long MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
+    private static final long MAX_DOCUMENT_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB (NF)
 
     private final Storage storage;
     private final GcsProperties gcsProperties;
@@ -99,6 +103,43 @@ public class GcsStorageService {
         storage.create(blobInfo, pfxBytes);
         String url = "https://storage.googleapis.com/" + bucketName + "/" + objectName;
         log.debug("Certificado PFX enviado ao GCS: {} -> {}", objectName, url);
+        return url;
+    }
+
+    /**
+     * Faz upload da Nota Fiscal do prestador PJ (PDF ou XML) para o bucket GCS.
+     * Pasta: contractor-invoices/{tenantId}/{contractorId}/{invoiceId}.pdf
+     *
+     * @param tenantId    ID do tenant
+     * @param contractorId ID do prestador
+     * @param invoiceId   ID do registro da NF
+     * @param file        arquivo (PDF ou XML)
+     * @return URL do objeto no GCS
+     */
+    public String uploadContractorInvoice(UUID tenantId, UUID contractorId, UUID invoiceId, MultipartFile file) throws IOException {
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("Arquivo da nota fiscal não pode ser vazio.");
+        }
+        String contentType = file.getContentType();
+        if (contentType == null || !ALLOWED_DOCUMENT_TYPES.contains(contentType.toLowerCase())) {
+            throw new IllegalArgumentException("Tipo não permitido. Use: PDF ou XML.");
+        }
+        if (file.getSize() > MAX_DOCUMENT_SIZE_BYTES) {
+            throw new IllegalArgumentException("Arquivo muito grande. Máximo: 10 MB.");
+        }
+        String bucketName = gcsProperties.getBucketName();
+        if (bucketName == null || bucketName.isBlank()) {
+            throw new IllegalStateException("Bucket GCS não configurado.");
+        }
+        String ext = contentType != null && contentType.contains("pdf") ? ".pdf" : ".xml";
+        String objectName = "contractor-invoices/" + tenantId + "/" + contractorId + "/" + invoiceId + ext;
+        BlobId blobId = BlobId.of(bucketName, objectName);
+        BlobInfo blobInfo = BlobInfo.newBuilder(blobId)
+                .setContentType(contentType != null ? contentType : "application/pdf")
+                .build();
+        storage.create(blobInfo, file.getBytes());
+        String url = "https://storage.googleapis.com/" + bucketName + "/" + objectName;
+        log.debug("NF prestador PJ enviada ao GCS: {} -> {}", objectName, url);
         return url;
     }
 

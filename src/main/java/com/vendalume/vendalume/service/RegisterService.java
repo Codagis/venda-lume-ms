@@ -19,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -62,12 +63,6 @@ public class RegisterService {
         if (forCurrentOperatorOnly && !SecurityUtils.isCurrentUserRoot()) {
             UUID userId = SecurityUtils.getCurrentUserId();
             list = registerRepository.findActiveByTenantIdAndOperatorUserId(tenantId, userId);
-            if (deviceImei != null && !deviceImei.isBlank()) {
-                String imeiTrimmed = deviceImei.trim();
-                list = list.stream()
-                        .filter(r -> r.getImei() == null || r.getImei().isBlank() || r.getImei().trim().equals(imeiTrimmed))
-                        .toList();
-            }
         } else {
             list = registerRepository.findByTenantIdAndActiveTrueOrderByName(tenantId);
         }
@@ -90,9 +85,8 @@ public class RegisterService {
         }
         UUID userId = SecurityUtils.getCurrentUserId();
 
-        String imeiTrimmed = request.getImei() != null && !request.getImei().isBlank() ? request.getImei().trim() : null;
-        if (imeiTrimmed != null && registerRepository.existsByImei(imeiTrimmed)) {
-            throw new IllegalArgumentException("Já existe um caixa vinculado a este IMEI (equipamento).");
+        if (request.getAccessPassword() == null || request.getAccessPassword().isBlank()) {
+            throw new IllegalArgumentException("Senha de acesso do PDV é obrigatória. O operador precisará digitar esta senha para acessar o caixa.");
         }
         Register r = Register.builder()
                 .id(UUID.randomUUID())
@@ -102,11 +96,9 @@ public class RegisterService {
                 .equipmentType(request.getEquipmentType())
                 .description(request.getDescription() != null && !request.getDescription().isBlank() ? request.getDescription().trim() : null)
                 .active(request.getActive() != null ? request.getActive() : true)
-                .imei(imeiTrimmed)
+                .imei(null)
                 .build();
-        if (request.getAccessPassword() != null && !request.getAccessPassword().isBlank()) {
-            r.setAccessPasswordHash(passwordEncoder.encode(request.getAccessPassword()));
-        }
+        r.setAccessPasswordHash(passwordEncoder.encode(request.getAccessPassword()));
         r.setCreatedBy(userId);
         r.setUpdatedBy(userId);
         r = registerRepository.save(r);
@@ -128,17 +120,11 @@ public class RegisterService {
         r.setEquipmentType(request.getEquipmentType());
         r.setDescription(request.getDescription() != null && !request.getDescription().isBlank() ? request.getDescription().trim() : null);
         r.setActive(request.getActive() != null ? request.getActive() : true);
-        if (request.getImei() != null && !request.getImei().isBlank()) {
-            String imeiTrimmed = request.getImei().trim();
-            if (registerRepository.existsByImeiAndIdNot(imeiTrimmed, id)) {
-                throw new IllegalArgumentException("Já existe outro caixa vinculado a este IMEI (equipamento).");
-            }
-            r.setImei(imeiTrimmed);
-        } else {
-            r.setImei(null);
-        }
+        r.setImei(null);
         if (request.getAccessPassword() != null && !request.getAccessPassword().isBlank()) {
             r.setAccessPasswordHash(passwordEncoder.encode(request.getAccessPassword()));
+        } else if (r.getAccessPasswordHash() == null || r.getAccessPasswordHash().isBlank()) {
+            throw new IllegalArgumentException("Senha de acesso do PDV é obrigatória.");
         }
         r.setUpdatedBy(userId);
         r = registerRepository.save(r);
@@ -218,6 +204,37 @@ public class RegisterService {
         RegisterOperator ro = RegisterOperator.builder().registerId(r.getId()).userId(userId).build();
         registerOperatorRepository.save(ro);
         return toResponse(r);
+    }
+
+    /**
+     * Gera um código IMEI único para o PDV e vincula ao ponto de venda.
+     * O operador precisará informar este código no dispositivo para acessar o PDV.
+     */
+    @Transactional
+    public RegisterResponse generateImei(UUID registerId, UUID requestTenantId) {
+        UUID tenantId = resolveTenantId(requestTenantId);
+        Register r = registerRepository.findByIdAndTenantId(registerId, tenantId)
+                .orElseThrow(() -> new ResourceNotFoundException("Ponto de venda", registerId));
+        String imei = generateUniqueImei();
+        r.setImei(imei);
+        r.setUpdatedBy(SecurityUtils.getCurrentUserId());
+        registerRepository.save(r);
+        return toResponse(r);
+    }
+
+    private static final String IMEI_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    private static final SecureRandom RANDOM = new SecureRandom();
+
+    private String generateUniqueImei() {
+        for (int attempt = 0; attempt < 50; attempt++) {
+            StringBuilder sb = new StringBuilder(12);
+            for (int i = 0; i < 12; i++) {
+                sb.append(IMEI_CHARS.charAt(RANDOM.nextInt(IMEI_CHARS.length())));
+            }
+            String imei = sb.toString();
+            if (!registerRepository.existsByImei(imei)) return imei;
+        }
+        return UUID.randomUUID().toString().replace("-", "").substring(0, 16);
     }
 
     /**

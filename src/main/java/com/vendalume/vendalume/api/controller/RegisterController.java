@@ -87,6 +87,14 @@ public class RegisterController {
         return ResponseEntity.ok(registerService.create(request, tenantId));
     }
 
+    @PostMapping("/{id}/generate-imei")
+    @Operation(summary = "Gerar código IMEI para o PDV. O operador informa este código no dispositivo para vincular e acessar o caixa.")
+    public ResponseEntity<RegisterResponse> generateImei(
+            @PathVariable UUID id,
+            @RequestParam(required = false) UUID tenantId) {
+        return ResponseEntity.ok(registerService.generateImei(id, tenantId));
+    }
+
     @PutMapping("/{id}")
     @Operation(summary = "Atualizar ponto de venda")
     public ResponseEntity<RegisterResponse> update(

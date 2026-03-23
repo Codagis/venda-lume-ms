@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Recibo de Pagamento de Salário</title>
+
+<style>
+
+@page {
+    size: A4;
+    margin: 10mm;
+}
+
+body{
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 10px;
+    background: #fff;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.container{
+    width: 100%;
+    max-width: 190mm;
+    margin: 0 auto;
+    padding: 8px;
+    background: white;
+    border: 1px solid #000;
+    box-sizing: border-box;
+}
+
+h1{
+    text-align:right;
+    font-size:14px;
+    margin:0;
+}
+
+.header{
+    display:flex;
+    justify-content:space-between;
+    border-bottom:1px solid #000;
+    padding-bottom:5px;
+}
+
+.empregador{
+    font-size:10px;
+}
+
+.empregador div{
+    margin:3px 0;
+}
+
+.ref{
+    text-align:right;
+    font-size:10px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:10px;
+}
+
+th, td{
+    border:1px solid #000;
+    padding:5px;
+}
+
+.no-border{
+    border:none;
+}
+
+.funcionario{
+    margin-top:10px;
+}
+
+.descricao{
+    height:260px;
+}
+
+.right{
+    text-align:right;
+}
+
+.center{
+    text-align:center;
+}
+
+.totais{
+    margin-top:0;
+}
+
+.totais td{
+    font-weight:bold;
+}
+
+.footer-table{
+    margin-top:8px;
+    width:100%;
+    border-collapse:collapse;
+    font-size:9px;
+}
+
+.footer-table td{
+    border:1px solid #000;
+    padding:5px;
+    width:33.33%;
+    text-align:center;
+    vertical-align:middle;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="header">
+
+<div class="empregador">
+<strong>EMPREGADOR</strong>
+
+<div>
+Nome: 
+<span th:text="${empregadorNome}">
+Empresa Exemplo LTDA
+</span>
+</div>
+
+<div>
+Endereço: 
+<span th:text="${empregadorEndereco}">
+Rua das Empresas, 123
+</span>
+</div>
+
+<div>
+CNPJ: 
+<span th:text="${empregadorCnpj}">
+12.345.678/0001-99
+</span>
+</div>
+
+</div>
+
+<div>
+<h1>Recibo de Pagamento de Salário</h1>
+
+<div class="ref">
+Referente ao Mês / Ano<br>
+
+<strong th:text="${mesAnoReferencia}">
+Janeiro - 2022
+</strong>
+
+</div>
+
+</div>
+
+</div>
+
+
+<table class="funcionario">
+
+<tr>
+<th style="width:80px">CÓDIGO</th>
+<th>NOME DO FUNCIONÁRIO</th>
+<th style="width:100px">CBO</th>
+<th style="width:150px">FUNÇÃO</th>
+</tr>
+
+<tr>
+
+<td class="center"
+th:text="${funcionarioCodigo}">
+0001
+</td>
+
+<td
+th:text="${funcionarioNome}">
+João da Silva
+</td>
+
+<td class="center"
+th:text="${funcionarioCbo}">
+1234-56
+</td>
+
+<td
+th:text="${funcionarioFuncao}">
+Vigilante
+</td>
+
+</tr>
+
+</table>
+
+
+<table>
+
+<tr>
+<th style="width:60px">Cód.</th>
+<th>Descrição</th>
+<th style="width:120px">Referência</th>
+<th style="width:150px">Proventos</th>
+<th style="width:150px">Descontos</th>
+</tr>
+
+
+<tr th:each="row : ${linhas}">
+
+<td></td>
+
+<td th:text="${row.descricao}">
+SALÁRIO BASE
+</td>
+
+<td class="center"
+th:text="${row.referencia}">
+220:00
+</td>
+
+<td class="right"
+th:text="${row.proventos}">
+5.000,00
+</td>
+
+<td class="right"
+th:text="${row.descontos}">
+</td>
+
+</tr>
+
+
+<tr class="descricao">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+
+</table>
+
+
+<table class="totais">
+
+<tr>
+
+<td class="right">
+Total dos Vencimentos
+</td>
+
+<td class="right"
+style="width:150px"
+th:text="${totalProventos}">
+7.089,84
+</td>
+
+<td class="right">
+Total dos Descontos
+</td>
+
+<td class="right"
+style="width:150px"
+th:text="${totalDescontos}">
+1.980,93
+</td>
+
+</tr>
+
+<tr>
+
+<td colspan="3"
+class="right">
+Líquido a Receber
+</td>
+
+<td class="right"
+th:text="${liquidoReceber}">
+5.108,91
+</td>
+
+</tr>
+
+</table>
+
+
+<table class="footer-table">
+<tr>
+<td>Salário Base<br><strong th:text="${salarioBase}">1.625,00</strong></td>
+<td>Base Cálc. INSS / FGTS<br><strong th:text="${baseCalcInssFgts}">1.625,00</strong></td>
+<td>FGTS do Mês<br><strong th:text="${fgtsMes}">130,00</strong></td>
+</tr>
+</table>
+
+</div>
+
+</body>
+</html>

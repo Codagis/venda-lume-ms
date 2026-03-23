@@ -16,6 +16,7 @@ import java.util.UUID;
     @Index(name = "idx_ap_tenant_status", columnList = "tenant_id, status"),
     @Index(name = "idx_ap_tenant_due_date", columnList = "tenant_id, due_date"),
     @Index(name = "idx_ap_supplier", columnList = "supplier_id"),
+    @Index(name = "idx_ap_employee", columnList = "employee_id"),
     @Index(name = "idx_ap_created_at", columnList = "created_at")
 })
 @Getter
@@ -38,6 +39,22 @@ public class AccountPayable extends BaseAuditableEntity {
     @Comment("Fornecedor vinculado")
     @Column(name = "supplier_id", columnDefinition = "UUID")
     private UUID supplierId;
+
+    @Comment("Funcionário vinculado (conta de salário/folha)")
+    @Column(name = "employee_id", columnDefinition = "UUID")
+    private UUID employeeId;
+
+    @Comment("Prestador PJ vinculado (pagamento de serviço)")
+    @Column(name = "contractor_id", columnDefinition = "UUID")
+    private UUID contractorId;
+
+    @Comment("Nota fiscal do prestador vinculada ao pagamento")
+    @Column(name = "contractor_invoice_id", columnDefinition = "UUID")
+    private UUID contractorInvoiceId;
+
+    @Comment("Mês de referência da folha (YYYY-MM) para contas geradas por funcionário")
+    @Column(name = "payroll_reference", length = 7)
+    private String payrollReference;
 
     @Column(name = "description", nullable = false, length = 255)
     private String description;

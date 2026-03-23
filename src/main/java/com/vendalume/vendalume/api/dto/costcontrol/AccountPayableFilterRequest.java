@@ -26,6 +26,8 @@ public class AccountPayableFilterRequest {
     private String search;
     private AccountStatus status;
     private UUID supplierId;
+    private UUID employeeId;
+    private UUID contractorId;
     private LocalDate dueDateFrom;
     private LocalDate dueDateTo;
 
