@@ -19,7 +19,6 @@ import java.util.UUID;
  */
 @Repository
 public interface RegisterRepository extends JpaRepository<Register, UUID> {
-
     @Query(value = "SELECT * FROM registers WHERE tenant_id = CAST(:tenantId AS UUID) ORDER BY name ASC", nativeQuery = true)
     List<Register> findByTenantIdOrderByName(@Param("tenantId") UUID tenantId);
 
