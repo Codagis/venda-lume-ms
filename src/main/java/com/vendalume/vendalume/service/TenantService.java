@@ -106,11 +106,8 @@ public class TenantService {
                 .build();
         tenant = tenantRepository.save(tenant);
         uploadCertificadoSeEnviado(tenant, request.getCertificadoPfxBase64());
-        try {
-            fiscalSimplifyService.syncTenantToFiscalSimplify(tenant,
-                    request.getCertificadoPfxBase64(), request.getCertificadoPassword());
-        } catch (Exception e) {
-        }
+        fiscalSimplifyService.syncTenantToFiscalSimplify(tenant,
+                request.getCertificadoPfxBase64(), request.getCertificadoPassword());
         return toResponse(tenant);
     }
 
@@ -166,11 +163,8 @@ public class TenantService {
         }
         tenant = tenantRepository.save(tenant);
         uploadCertificadoSeEnviado(tenant, request.getCertificadoPfxBase64());
-        try {
-            fiscalSimplifyService.syncTenantToFiscalSimplify(tenant,
-                    request.getCertificadoPfxBase64(), request.getCertificadoPassword());
-        } catch (Exception e) {
-        }
+        fiscalSimplifyService.syncTenantToFiscalSimplify(tenant,
+                request.getCertificadoPfxBase64(), request.getCertificadoPassword());
         return toResponse(tenant);
     }
 

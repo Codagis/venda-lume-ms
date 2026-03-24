@@ -8,6 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.Exceptions;
 
 import java.util.Map;
 
@@ -70,6 +71,15 @@ public class FiscalSimplifyClient {
             log.debug("Fiscal Simplify desabilitado - não cadastrando empresa");
             return null;
         }
+        if (baseUrl == null || baseUrl.isBlank() || "http://localhost:8081".equalsIgnoreCase(baseUrl.trim())) {
+            throw new IllegalStateException(
+                    "FISCAL_SIMPLIFY_BASE_URL não configurado para o ambiente atual. " +
+                    "Valor atual: '" + baseUrl + "'. Configure a URL pública do FiscalSimplify.");
+        }
+        if (apiKey == null || apiKey.isBlank()) {
+            throw new IllegalStateException(
+                    "FISCAL_SIMPLIFY_API_KEY não configurado. A API FiscalSimplify exige X-API-Key.");
+        }
         try {
             Map<?, ?> result = client().post()
                     .uri("/companies")
@@ -85,9 +95,17 @@ public class FiscalSimplifyClient {
         } catch (WebClientResponseException.BadRequest | WebClientResponseException.Conflict e) {
             log.warn("Fiscal Simplify: empresa já existe ou dados inválidos - {}", e.getResponseBodyAsString());
             return null;
+        } catch (WebClientResponseException e) {
+            log.error("Erro HTTP ao cadastrar empresa no Fiscal Simplify: status={} body={}",
+                    e.getStatusCode(), e.getResponseBodyAsString());
+            throw new RuntimeException(
+                    "Falha ao integrar empresa com Fiscal Simplify. HTTP " + e.getStatusCode() +
+                    " - " + e.getResponseBodyAsString(), e);
         } catch (Exception e) {
             log.error("Erro ao cadastrar empresa no Fiscal Simplify", e);
-            throw new RuntimeException("Falha ao integrar empresa com Fiscal Simplify: " + e.getMessage(), e);
+            Throwable root = Exceptions.unwrap(e);
+            String rootMessage = root != null && root.getMessage() != null ? root.getMessage() : e.getMessage();
+            throw new RuntimeException("Falha ao integrar empresa com Fiscal Simplify: " + rootMessage, e);
         }
     }
 

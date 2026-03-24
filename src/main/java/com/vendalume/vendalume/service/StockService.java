@@ -145,7 +145,7 @@ public class StockService {
 
     @Transactional(readOnly = true)
     public List<StockMovementResponse> listMovementsByProduct(UUID tenantId, UUID productId, int limit) {
-        Pageable pageable = PageRequest.of(0, Math.min(limit, 50), Sort.by(Sort.Direction.DESC, "createdAt"));
+        Pageable pageable = PageRequest.of(0, Math.min(limit, 50));
         List<StockMovement> list = stockMovementRepository.findByProductIdOrderByCreatedAtDesc(productId, pageable);
         Product product = productRepository.findById(productId).orElse(null);
         String name = product != null ? product.getName() : null;
