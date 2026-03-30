@@ -33,7 +33,7 @@ public class GcsStorageService {
             "image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"
     );
     private static final List<String> ALLOWED_DOCUMENT_TYPES = Arrays.asList(
-            "application/pdf", "application/xml", "text/xml"
+            "application/xml", "text/xml", "application/json", "text/json"
     );
     private static final long MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
     private static final long MAX_DOCUMENT_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB (NF)
@@ -140,6 +140,45 @@ public class GcsStorageService {
         storage.create(blobInfo, file.getBytes());
         String url = "https://storage.googleapis.com/" + bucketName + "/" + objectName;
         log.debug("NF prestador PJ enviada ao GCS: {} -> {}", objectName, url);
+        return url;
+    }
+
+    /**
+     * Faz upload de arquivos de importação de venda (PDF/XML/JSON) relacionados a uma nota fiscal.
+     * Pasta: sale-imports/{tenantId}/{saleId}/{kind}.{ext}
+     */
+    public String uploadSaleImport(UUID tenantId, UUID saleId, String kind, MultipartFile file) throws IOException {
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("Arquivo não pode ser vazio.");
+        }
+        if (tenantId == null || saleId == null) {
+            throw new IllegalArgumentException("Tenant e venda são obrigatórios.");
+        }
+        String contentType = file.getContentType();
+        if (contentType == null || !ALLOWED_DOCUMENT_TYPES.contains(contentType.toLowerCase())) {
+            throw new IllegalArgumentException("Tipo não permitido. Use: XML ou JSON.");
+        }
+        if (file.getSize() > MAX_DOCUMENT_SIZE_BYTES) {
+            throw new IllegalArgumentException("Arquivo muito grande. Máximo: 10 MB.");
+        }
+        String bucketName = gcsProperties.getBucketName();
+        if (bucketName == null || bucketName.isBlank()) {
+            throw new IllegalStateException("Bucket GCS não configurado.");
+        }
+        String ext;
+        String ct = contentType.toLowerCase();
+        if (ct.contains("xml")) ext = ".xml";
+        else if (ct.contains("json")) ext = ".json";
+        else ext = ".bin";
+        String safeKind = (kind != null && !kind.isBlank()) ? kind.trim().toLowerCase() : "document";
+        String objectName = "sale-imports/" + tenantId + "/" + saleId + "/" + safeKind + ext;
+        BlobId blobId = BlobId.of(bucketName, objectName);
+        BlobInfo blobInfo = BlobInfo.newBuilder(blobId)
+                .setContentType(contentType)
+                .build();
+        storage.create(blobInfo, file.getBytes());
+        String url = "https://storage.googleapis.com/" + bucketName + "/" + objectName;
+        log.debug("Import venda enviado ao GCS: {} -> {}", objectName, url);
         return url;
     }
 

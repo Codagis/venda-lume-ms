@@ -2,6 +2,7 @@ package com.vendalume.vendalume.security;
 
 import com.vendalume.vendalume.domain.entity.User;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Optional;
@@ -52,5 +53,19 @@ public final class SecurityUtils {
 
     public static UUID getCurrentUserId() {
         return requireCurrentUser().getId();
+    }
+
+    /** Verifica se o contexto de segurança atual possui a autoridade informada (ex.: PERMISSION_TENANT_MANAGE). */
+    public static boolean currentUserHasAuthority(String authority) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            return false;
+        }
+        for (GrantedAuthority a : auth.getAuthorities()) {
+            if (authority != null && authority.equals(a.getAuthority())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

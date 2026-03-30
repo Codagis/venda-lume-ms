@@ -7,7 +7,9 @@ import com.vendalume.vendalume.api.dto.auth.RegisterRequest;
 import com.vendalume.vendalume.api.dto.auth.UserInfo;
 import com.vendalume.vendalume.api.dto.auth.UserResponse;
 import com.vendalume.vendalume.config.JwtProperties;
+import com.vendalume.vendalume.domain.entity.Permission;
 import com.vendalume.vendalume.domain.entity.User;
+import com.vendalume.vendalume.repository.ProfileRepository;
 import com.vendalume.vendalume.repository.UserRepository;
 import com.vendalume.vendalume.security.CookieAuthHelper;
 import com.vendalume.vendalume.security.JwtClaims;
@@ -24,8 +26,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.HashSet;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 /**
  * Serviço de autenticação com JWT e cadastro de usuários.
@@ -42,6 +45,7 @@ public class AuthService {
     private static final int LOCKOUT_MINUTES = 15;
 
     private final UserRepository userRepository;
+    private final ProfileRepository profileRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtProperties jwtProperties;
@@ -93,6 +97,7 @@ public class AuthService {
         cookieAuthHelper.clearAuthCookies(response);
     }
 
+    @Transactional(readOnly = true)
     public UserInfo getCurrentUserInfo() {
         User user = SecurityUtils.requireCurrentUser();
         return UserInfo.builder()
@@ -104,10 +109,25 @@ public class AuthService {
                 .tenantId(user.getTenantId())
                 .isRoot(user.getIsRoot())
                 .profileId(user.getProfileId())
-                .authorities(user.getAuthorities().stream()
-                        .map(a -> a.getAuthority())
-                        .collect(Collectors.toSet()))
+                .authorities(resolveAuthorities(user))
                 .build();
+    }
+
+    private Set<String> resolveAuthorities(User user) {
+        Set<String> authorities = new HashSet<>();
+        user.getAuthorities().forEach(a -> authorities.add(a.getAuthority()));
+        if (user.getProfileId() != null) {
+            profileRepository.findByIdWithPermissions(user.getProfileId()).ifPresent(profile -> {
+                if (profile.getPermissions() != null) {
+                    for (Permission p : profile.getPermissions()) {
+                        if (p != null && p.getCode() != null && !p.getCode().isBlank()) {
+                            authorities.add("PERMISSION_" + p.getCode().trim());
+                        }
+                    }
+                }
+            });
+        }
+        return authorities;
     }
 
     private User authenticateUser(LoginRequest request) {
@@ -193,9 +213,7 @@ public class AuthService {
                 .tenantId(user.getTenantId())
                 .isRoot(user.getIsRoot())
                 .profileId(user.getProfileId())
-                .authorities(user.getAuthorities().stream()
-                        .map(a -> a.getAuthority())
-                        .collect(Collectors.toSet()))
+                .authorities(resolveAuthorities(user))
                 .build();
 
         return LoginResponse.builder()

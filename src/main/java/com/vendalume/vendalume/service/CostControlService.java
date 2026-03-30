@@ -114,15 +114,6 @@ public class CostControlService {
         if (ap.getStatus() == AccountStatus.PAID || ap.getStatus() == AccountStatus.CANCELLED) {
             throw new IllegalArgumentException("Conta já paga ou cancelada.");
         }
-        if (ap.getContractorId() != null) {
-            if (ap.getContractorInvoiceId() == null) {
-                throw new IllegalArgumentException("Conta vinculada a prestador PJ: é obrigatório ter uma Nota Fiscal da competência. Cadastre a NF do prestador e vincule à conta antes de registrar o pagamento.");
-            }
-            var invoice = contractorInvoiceRepository.findByIdAndTenantId(ap.getContractorInvoiceId(), tenantId).orElse(null);
-            if (invoice == null || invoice.getFileGcsPath() == null || invoice.getFileGcsPath().isBlank()) {
-                throw new IllegalArgumentException("É obrigatório anexar a Nota Fiscal do prestador PJ desta competência antes de registrar o pagamento. Acesse Prestadores PJ e envie o arquivo da NF.");
-            }
-        }
         BigDecimal newPaid = (ap.getPaidAmount() != null ? ap.getPaidAmount() : BigDecimal.ZERO).add(request.getAmount());
         if (newPaid.compareTo(ap.getAmount()) > 0) {
             throw new IllegalArgumentException("Valor do pagamento excede o valor total da conta.");

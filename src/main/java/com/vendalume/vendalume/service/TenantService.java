@@ -28,6 +28,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class TenantService {
 
+    private static final String PERMISSION_TENANT_MANAGE = "PERMISSION_TENANT_MANAGE";
+
     private final TenantRepository tenantRepository;
     private final FiscalSimplifyService fiscalSimplifyService;
     private final Optional<GcsStorageService> gcsStorageService;
@@ -35,6 +37,22 @@ public class TenantService {
     private void requireRoot() {
         if (!SecurityUtils.isCurrentUserRoot()) {
             throw new IllegalStateException("Acesso negado. Apenas usuário root pode gerenciar empresas.");
+        }
+    }
+
+    /**
+     * Root: qualquer empresa. Demais usuários: apenas a própria empresa, com permissão TENANT_MANAGE.
+     */
+    private void requireTenantAccessForReadOrUpdate(UUID id) {
+        if (SecurityUtils.isCurrentUserRoot()) {
+            return;
+        }
+        UUID tenantId = SecurityUtils.requireTenantId();
+        if (!id.equals(tenantId)) {
+            throw new IllegalStateException("Acesso negado. Só é possível acessar os dados da sua empresa.");
+        }
+        if (!SecurityUtils.currentUserHasAuthority(PERMISSION_TENANT_MANAGE)) {
+            throw new IllegalStateException("Acesso negado. É necessária a permissão de gerenciar empresas.");
         }
     }
 
@@ -48,7 +66,7 @@ public class TenantService {
 
     @Transactional(readOnly = true)
     public TenantResponse findById(UUID id) {
-        requireRoot();
+        requireTenantAccessForReadOrUpdate(id);
         Tenant tenant = tenantRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Empresa", id));
         return toResponse(tenant);
@@ -113,7 +131,7 @@ public class TenantService {
 
     @Transactional
     public TenantResponse update(UUID id, TenantRequest request) {
-        requireRoot();
+        requireTenantAccessForReadOrUpdate(id);
         Tenant tenant = tenantRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Empresa", id));
         if (request.getDocument() != null && !request.getDocument().isBlank()
@@ -158,7 +176,7 @@ public class TenantService {
             if (v.isEmpty()) tenant.setCardFeeValue(null);
         }
         if (request.getCardFeeValue() != null && tenant.getCardFeeType() != null) tenant.setCardFeeValue(request.getCardFeeValue());
-        if (request.getActive() != null) {
+        if (SecurityUtils.isCurrentUserRoot() && request.getActive() != null) {
             tenant.setActive(request.getActive());
         }
         tenant = tenantRepository.save(tenant);

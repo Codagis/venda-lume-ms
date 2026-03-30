@@ -1,6 +1,8 @@
 package com.vendalume.vendalume.security;
 
 import com.vendalume.vendalume.domain.entity.User;
+import com.vendalume.vendalume.domain.entity.Permission;
+import com.vendalume.vendalume.repository.ProfileRepository;
 import com.vendalume.vendalume.repository.UserRepository;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
@@ -10,6 +12,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
@@ -17,7 +21,10 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Filtro de autenticação JWT para requisições protegidas.
@@ -35,6 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
+    private final ProfileRepository profileRepository;
     private final CookieAuthHelper cookieAuthHelper;
 
     @Override
@@ -52,8 +60,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     if (userOpt.isPresent()) {
                         User user = userOpt.get();
                         if (user.isEnabled() && claims.getTokenVersion().equals(user.getRefreshTokenVersion())) {
+                            Set<GrantedAuthority> authorities = new HashSet<>();
+                            // Sempre mantém autoridades do role (ex.: ROLE_* e PERMISSION_FULL_SYSTEM_ACCESS)
+                            authorities.addAll(user.getAuthorities().stream().map(a -> (GrantedAuthority) a).collect(Collectors.toSet()));
+
+                            // Se usuário tiver profileId, adiciona permissões granulares do perfil
+                            if (user.getProfileId() != null) {
+                                profileRepository.findByIdWithPermissions(user.getProfileId()).ifPresent(profile -> {
+                                    if (profile.getPermissions() != null) {
+                                        for (Permission p : profile.getPermissions()) {
+                                            if (p != null && p.getCode() != null && !p.getCode().isBlank()) {
+                                                authorities.add(new SimpleGrantedAuthority("PERMISSION_" + p.getCode().trim()));
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+
                             UsernamePasswordAuthenticationToken authentication =
-                                    new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+                                    new UsernamePasswordAuthenticationToken(user, null, authorities);
                             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                             SecurityContextHolder.getContext().setAuthentication(authentication);
                         }

@@ -248,6 +248,32 @@ public class FiscalSimplifyClient {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> importarNfeXml(byte[] xmlBytes) {
+        if (!enabled) throw new IllegalStateException("Fiscal Simplify está desabilitado.");
+        if (xmlBytes == null || xmlBytes.length == 0) throw new IllegalArgumentException("XML vazio.");
+        try {
+            org.springframework.http.client.MultipartBodyBuilder mb = new org.springframework.http.client.MultipartBodyBuilder();
+            mb.part("xml", xmlBytes)
+                    .filename("nfe.xml")
+                    .contentType(MediaType.APPLICATION_XML);
+            Map<String, Object> result = client().post()
+                    .uri("/nfe/import-xml")
+                    .contentType(MediaType.MULTIPART_FORM_DATA)
+                    .bodyValue(mb.build())
+                    .retrieve()
+                    .bodyToMono(Map.class)
+                    .block();
+            return result != null ? result : Map.of();
+        } catch (WebClientResponseException e) {
+            log.error("Fiscal Simplify erro ao importar XML NF-e: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw new RuntimeException("Falha ao importar XML da NF-e: " + e.getResponseBodyAsString(), e);
+        } catch (Exception e) {
+            log.error("Erro ao importar XML NF-e no Fiscal Simplify", e);
+            throw new RuntimeException("Falha ao importar XML da NF-e: " + e.getMessage(), e);
+        }
+    }
+
     public byte[] getNfePdf(String nfeId) {
         if (!enabled) {
             throw new IllegalStateException("Fiscal Simplify está desabilitado.");
@@ -266,6 +292,271 @@ public class FiscalSimplifyClient {
         } catch (Exception e) {
             log.error("Erro ao obter PDF NF-e no Fiscal Simplify", e);
             throw new RuntimeException("Falha ao obter PDF da NF-e: " + e.getMessage(), e);
+        }
+    }
+
+    public byte[] getNfeXml(String nfeId) {
+        if (!enabled) throw new IllegalStateException("Fiscal Simplify está desabilitado.");
+        try {
+            byte[] xml = client().get()
+                    .uri("/nfe/{id}/xml?download=false", nfeId)
+                    .accept(MediaType.APPLICATION_XML)
+                    .retrieve()
+                    .bodyToMono(byte[].class)
+                    .block();
+            return xml != null ? xml : new byte[0];
+        } catch (WebClientResponseException e) {
+            log.error("Fiscal Simplify erro ao obter XML NF-e: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw new RuntimeException("Falha ao obter XML da NF-e: " + e.getResponseBodyAsString(), e);
+        } catch (Exception e) {
+            log.error("Erro ao obter XML NF-e no Fiscal Simplify", e);
+            throw new RuntimeException("Falha ao obter XML da NF-e: " + e.getMessage(), e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> getNfeById(String nfeId) {
+        if (!enabled) throw new IllegalStateException("Fiscal Simplify está desabilitado.");
+        try {
+            Map<String, Object> result = client().get()
+                    .uri("/nfe/{id}", nfeId)
+                    .retrieve()
+                    .bodyToMono(Map.class)
+                    .block();
+            return result != null ? result : Map.of();
+        } catch (WebClientResponseException e) {
+            log.error("Fiscal Simplify erro ao detalhar NF-e: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw new RuntimeException("Falha ao detalhar NF-e: " + e.getResponseBodyAsString(), e);
+        } catch (Exception e) {
+            log.error("Erro ao detalhar NF-e no Fiscal Simplify", e);
+            throw new RuntimeException("Falha ao detalhar NF-e: " + e.getMessage(), e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> listarNfeEmitidas(
+            String cnpj,
+            String ambiente,
+            Integer top,
+            Integer skip,
+            Boolean inlinecount,
+            String referencia,
+            String chave,
+            String serie
+    ) {
+        if (!enabled) {
+            throw new IllegalStateException("Fiscal Simplify está desabilitado.");
+        }
+        String cnpjLimpo = cnpj != null ? cnpj.replaceAll("\\D", "") : "";
+        String amb = (ambiente != null && ambiente.equalsIgnoreCase("producao")) ? "producao" : "homologacao";
+        try {
+            Map<String, Object> result = client().get()
+                    .uri(uriBuilder -> {
+                        var b = uriBuilder.path("/nfe")
+                                .queryParam("cnpj", cnpjLimpo)
+                                .queryParam("ambiente", amb);
+                        if (top != null) b.queryParam("$top", top);
+                        if (skip != null) b.queryParam("$skip", skip);
+                        if (inlinecount != null) b.queryParam("$inlinecount", inlinecount);
+                        if (referencia != null && !referencia.isBlank()) b.queryParam("referencia", referencia.trim());
+                        if (chave != null && !chave.isBlank()) b.queryParam("chave", chave.trim());
+                        if (serie != null && !serie.isBlank()) b.queryParam("serie", serie.trim());
+                        return b.build();
+                    })
+                    .retrieve()
+                    .bodyToMono(Map.class)
+                    .block();
+            return result != null ? result : Map.of();
+        } catch (WebClientResponseException e) {
+            log.error("Fiscal Simplify erro ao listar NF-e emitidas: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw new RuntimeException("Falha ao listar NF-e emitidas: " + e.getResponseBodyAsString(), e);
+        } catch (Exception e) {
+            log.error("Erro ao listar NF-e emitidas no Fiscal Simplify", e);
+            throw new RuntimeException("Falha ao listar NF-e emitidas: " + e.getMessage(), e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> listarNfeRecebidas(
+            String cnpj,
+            String ambiente,
+            Integer top,
+            Integer skip,
+            Boolean inlinecount,
+            Integer distNsu,
+            String formaDistribuicao,
+            String chaveAcesso
+    ) {
+        if (!enabled) {
+            throw new IllegalStateException("Fiscal Simplify está desabilitado.");
+        }
+        String cnpjLimpo = cnpj != null ? cnpj.replaceAll("\\D", "") : "";
+        String amb = (ambiente != null && ambiente.equalsIgnoreCase("producao")) ? "producao" : "homologacao";
+        log.info("Fiscal Simplify client: GET {}/nfe/received?cnpj={}&ambiente={} ...", baseUrl, cnpjLimpo, amb);
+        try {
+            Map<String, Object> result = client().get()
+                    .uri(uriBuilder -> {
+                        var b = uriBuilder.path("/nfe/received")
+                                .queryParam("cnpj", cnpjLimpo)
+                                .queryParam("ambiente", amb);
+                        if (top != null) b.queryParam("$top", top);
+                        if (skip != null) b.queryParam("$skip", skip);
+                        if (inlinecount != null) b.queryParam("$inlinecount", inlinecount);
+                        if (distNsu != null) b.queryParam("dist_nsu", distNsu);
+                        if (formaDistribuicao != null && !formaDistribuicao.isBlank()) {
+                            b.queryParam("forma_distribuicao", formaDistribuicao.trim());
+                        }
+                        if (chaveAcesso != null && !chaveAcesso.isBlank()) b.queryParam("chave_acesso", chaveAcesso.trim());
+                        return b.build();
+                    })
+                    .retrieve()
+                    .bodyToMono(Map.class)
+                    .block();
+            return result != null ? result : Map.of();
+        } catch (WebClientResponseException e) {
+            log.error("Fiscal Simplify erro ao listar NF-e recebidas: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw new RuntimeException("Falha ao listar NF-e recebidas: " + e.getResponseBodyAsString(), e);
+        } catch (Exception e) {
+            log.error("Erro ao listar NF-e recebidas no Fiscal Simplify", e);
+            throw new RuntimeException("Falha ao listar NF-e recebidas: " + e.getMessage(), e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> listarNfceEmitidas(
+            String cnpj,
+            String ambiente,
+            Integer top,
+            Integer skip,
+            Boolean inlinecount,
+            String referencia,
+            String chave,
+            String serie
+    ) {
+        if (!enabled) {
+            throw new IllegalStateException("Fiscal Simplify está desabilitado.");
+        }
+        String cnpjLimpo = cnpj != null ? cnpj.replaceAll("\\D", "") : "";
+        String amb = (ambiente != null && ambiente.equalsIgnoreCase("producao")) ? "producao" : "homologacao";
+        try {
+            Map<String, Object> result = client().get()
+                    .uri(uriBuilder -> {
+                        var b = uriBuilder.path("/nfce")
+                                .queryParam("cnpj", cnpjLimpo)
+                                .queryParam("ambiente", amb);
+                        if (top != null) b.queryParam("$top", top);
+                        if (skip != null) b.queryParam("$skip", skip);
+                        if (inlinecount != null) b.queryParam("$inlinecount", inlinecount);
+                        if (referencia != null && !referencia.isBlank()) b.queryParam("referencia", referencia.trim());
+                        if (chave != null && !chave.isBlank()) b.queryParam("chave", chave.trim());
+                        if (serie != null && !serie.isBlank()) b.queryParam("serie", serie.trim());
+                        return b.build();
+                    })
+                    .retrieve()
+                    .bodyToMono(Map.class)
+                    .block();
+            return result != null ? result : Map.of();
+        } catch (WebClientResponseException e) {
+            log.error("Fiscal Simplify erro ao listar NFC-e emitidas: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw new RuntimeException("Falha ao listar NFC-e emitidas: " + e.getResponseBodyAsString(), e);
+        } catch (Exception e) {
+            log.error("Erro ao listar NFC-e emitidas no Fiscal Simplify", e);
+            throw new RuntimeException("Falha ao listar NFC-e emitidas: " + e.getMessage(), e);
+        }
+    }
+
+    public byte[] getNfceXml(String nfceId) {
+        if (!enabled) throw new IllegalStateException("Fiscal Simplify está desabilitado.");
+        try {
+            byte[] xml = client().get()
+                    .uri("/nfce/{id}/xml?download=false", nfceId)
+                    .accept(MediaType.APPLICATION_XML)
+                    .retrieve()
+                    .bodyToMono(byte[].class)
+                    .block();
+            return xml != null ? xml : new byte[0];
+        } catch (WebClientResponseException e) {
+            log.error("Fiscal Simplify erro ao obter XML NFC-e: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw new RuntimeException("Falha ao obter XML da NFC-e: " + e.getResponseBodyAsString(), e);
+        } catch (Exception e) {
+            log.error("Erro ao obter XML NFC-e no Fiscal Simplify", e);
+            throw new RuntimeException("Falha ao obter XML da NFC-e: " + e.getMessage(), e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> getNfceById(String nfceId) {
+        if (!enabled) throw new IllegalStateException("Fiscal Simplify está desabilitado.");
+        try {
+            Map<String, Object> result = client().get()
+                    .uri("/nfce/{id}", nfceId)
+                    .retrieve()
+                    .bodyToMono(Map.class)
+                    .block();
+            return result != null ? result : Map.of();
+        } catch (WebClientResponseException e) {
+            log.error("Fiscal Simplify erro ao detalhar NFC-e: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw new RuntimeException("Falha ao detalhar NFC-e: " + e.getResponseBodyAsString(), e);
+        } catch (Exception e) {
+            log.error("Erro ao detalhar NFC-e no Fiscal Simplify", e);
+            throw new RuntimeException("Falha ao detalhar NFC-e: " + e.getMessage(), e);
+        }
+    }
+
+    public byte[] getNfeReceivedPdf(String docId) {
+        if (!enabled) throw new IllegalStateException("Fiscal Simplify está desabilitado.");
+        try {
+            byte[] pdf = client().get()
+                    .uri("/nfe/received/{id}/pdf?download=false", docId)
+                    .accept(MediaType.APPLICATION_PDF)
+                    .retrieve()
+                    .bodyToMono(byte[].class)
+                    .block();
+            return pdf != null ? pdf : new byte[0];
+        } catch (WebClientResponseException e) {
+            log.error("Fiscal Simplify erro ao obter PDF NF-e recebida: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw new RuntimeException("Falha ao obter PDF da NF-e recebida: " + e.getResponseBodyAsString(), e);
+        } catch (Exception e) {
+            log.error("Erro ao obter PDF NF-e recebida no Fiscal Simplify", e);
+            throw new RuntimeException("Falha ao obter PDF da NF-e recebida: " + e.getMessage(), e);
+        }
+    }
+
+    public byte[] getNfeReceivedXml(String docId) {
+        if (!enabled) throw new IllegalStateException("Fiscal Simplify está desabilitado.");
+        try {
+            byte[] xml = client().get()
+                    .uri("/nfe/received/{id}/xml?download=false", docId)
+                    .accept(MediaType.APPLICATION_XML)
+                    .retrieve()
+                    .bodyToMono(byte[].class)
+                    .block();
+            return xml != null ? xml : new byte[0];
+        } catch (WebClientResponseException e) {
+            log.error("Fiscal Simplify erro ao obter XML NF-e recebida: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw new RuntimeException("Falha ao obter XML da NF-e recebida: " + e.getResponseBodyAsString(), e);
+        } catch (Exception e) {
+            log.error("Erro ao obter XML NF-e recebida no Fiscal Simplify", e);
+            throw new RuntimeException("Falha ao obter XML da NF-e recebida: " + e.getMessage(), e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> getNfeReceivedById(String docId) {
+        if (!enabled) throw new IllegalStateException("Fiscal Simplify está desabilitado.");
+        try {
+            Map<String, Object> result = client().get()
+                    .uri("/nfe/received/{id}", docId)
+                    .retrieve()
+                    .bodyToMono(Map.class)
+                    .block();
+            return result != null ? result : Map.of();
+        } catch (WebClientResponseException e) {
+            log.error("Fiscal Simplify erro ao detalhar NF-e recebida: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw new RuntimeException("Falha ao detalhar NF-e recebida: " + e.getResponseBodyAsString(), e);
+        } catch (Exception e) {
+            log.error("Erro ao detalhar NF-e recebida no Fiscal Simplify", e);
+            throw new RuntimeException("Falha ao detalhar NF-e recebida: " + e.getMessage(), e);
         }
     }
 }

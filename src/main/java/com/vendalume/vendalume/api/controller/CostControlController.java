@@ -4,6 +4,8 @@ import com.vendalume.vendalume.api.documentation.ApiDocumentedController;
 import com.vendalume.vendalume.api.documentation.DefaultApiResponses;
 import com.vendalume.vendalume.api.dto.costcontrol.*;
 import com.vendalume.vendalume.api.dto.product.PageResponse;
+import com.vendalume.vendalume.domain.enums.CostCategoryKind;
+import com.vendalume.vendalume.service.CostAccountCategoryService;
 import com.vendalume.vendalume.service.CostControlReportService;
 import com.vendalume.vendalume.service.CostControlService;
 import jakarta.validation.Valid;
@@ -16,6 +18,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -34,6 +37,40 @@ public class CostControlController {
 
     private final CostControlService costControlService;
     private final CostControlReportService costControlReportService;
+    private final CostAccountCategoryService costAccountCategoryService;
+
+    @Operation(summary = "Listar categorias de contas a pagar/receber por empresa")
+    @GetMapping("/categories")
+    public ResponseEntity<List<CostAccountCategoryResponse>> listCategories(
+            @RequestParam CostCategoryKind kind,
+            @RequestParam(required = false) UUID tenantId) {
+        return ResponseEntity.ok(costAccountCategoryService.list(tenantId, kind));
+    }
+
+    @Operation(summary = "Cadastrar categoria (a pagar ou a receber)")
+    @PostMapping("/categories")
+    public ResponseEntity<CostAccountCategoryResponse> createCategory(
+            @Valid @RequestBody CostAccountCategoryRequest request) {
+        CostAccountCategoryResponse response = costAccountCategoryService.create(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @Operation(summary = "Atualizar categoria")
+    @PutMapping("/categories/{id}")
+    public ResponseEntity<CostAccountCategoryResponse> updateCategory(
+            @PathVariable UUID id,
+            @Valid @RequestBody CostAccountCategoryRequest request) {
+        return ResponseEntity.ok(costAccountCategoryService.update(id, request));
+    }
+
+    @Operation(summary = "Excluir categoria")
+    @DeleteMapping("/categories/{id}")
+    public ResponseEntity<Void> deleteCategory(
+            @PathVariable UUID id,
+            @RequestParam(required = false) UUID tenantId) {
+        costAccountCategoryService.delete(id, tenantId);
+        return ResponseEntity.noContent().build();
+    }
 
     @Operation(summary = "Criar conta a pagar")
     @PostMapping("/payables")

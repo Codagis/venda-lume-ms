@@ -26,7 +26,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/tenants")
 @RequiredArgsConstructor
-@Tag(name = "Empresas", description = "CRUD de empresas (tenants). Apenas usuário root.")
+@Tag(name = "Empresas", description = "CRUD de empresas (tenants). Root: todas; demais: leitura/edição da própria empresa com TENANT_MANAGE.")
 public class TenantController {
 
     private final TenantService tenantService;

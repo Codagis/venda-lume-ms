@@ -133,8 +133,8 @@ public class DataLoader {
         createPermissionIfNotExists("USER_DELETE", "Excluir usuários", "Desativar ou remover usuários", "USERS");
         createPermissionIfNotExists("PROFILE_VIEW", "Visualizar perfis", "Ver perfis e configurações", "PROFILES");
         createPermissionIfNotExists("PROFILE_MANAGE", "Gerenciar perfis", "Criar e editar perfis", "PROFILES");
-        createPermissionIfNotExists("TENANT_VIEW", "Visualizar empresas", "Ver empresas (somente root)", "TENANTS");
-        createPermissionIfNotExists("TENANT_MANAGE", "Gerenciar empresas", "Criar e editar empresas", "TENANTS");
+        createPermissionIfNotExists("TENANT_VIEW", "Visualizar empresas", "Ver listagem de empresas (uso restrito)", "TENANTS");
+        createPermissionIfNotExists("TENANT_MANAGE", "Gerenciar empresas", "Criar/editar empresas (root: todas; demais: só a própria)", "TENANTS");
         createPermissionIfNotExists("SALE_VIEW", "Visualizar vendas", "Ver vendas e relatórios", "SALES");
         createPermissionIfNotExists("SALE_CREATE", "Registrar vendas", "Realizar vendas no PDV", "SALES");
         createPermissionIfNotExists("SALE_CANCEL", "Cancelar vendas", "Cancelar vendas", "SALES");
@@ -157,6 +157,8 @@ public class DataLoader {
         createPermissionIfNotExists("TABLE_MANAGE", "Gerenciar mesas", "Criar, editar e excluir seções, mesas e reservas", "RESTAURANT_TABLES");
         createPermissionIfNotExists("REGISTER_VIEW", "Visualizar pontos de venda", "Ver caixas e operadores", "REGISTERS");
         createPermissionIfNotExists("REGISTER_MANAGE", "Gerenciar pontos de venda", "Criar, editar caixas e atribuir operadores", "REGISTERS");
+
+        createPermissionIfNotExists("FISCAL_VIEW", "Visualizar notas fiscais", "Consultar NF-e/NFC-e emitidas e recebidas", "FISCAL");
     }
 
     private void createPermissionIfNotExists(String code, String name, String description, String module) {
@@ -186,6 +188,7 @@ public class DataLoader {
         createModule("CASHIERS", "Operadores de Caixa", "Usuários que operam os caixas (perfil Caixa/Operador)", "UserOutlined", "/cashiers", "Cashiers", 18, "REGISTER_VIEW");
         createModule("RESTAURANT_TABLES", "Mesas do Restaurante", "Seções, mesas e reservas", "CoffeeOutlined", "/restaurant-tables", "RestaurantTables", 19, "TABLE_VIEW");
         createModule("MODULES", "Módulos", "Cadastro de módulos do sistema", "AppstoreOutlined", "/modules", "Modules", 20, "MODULE_VIEW");
+        createModule("FISCAL", "Notas Fiscais", "Consulta de NF-e/NFC-e (emitidas e recebidas)", "FileSearchOutlined", "/fiscal-notes", "FiscalNotes", 21, "FISCAL_VIEW");
         createModule("USERS", "Usuários", "Cadastro de usuários", "TeamOutlined", "/users", "Users", 30, "USER_VIEW");
         createModule("SETTINGS", "Configurações", "Empresas, perfis e permissões", "SettingOutlined", "/settings", "Settings", 100, "PROFILE_VIEW");
         log.info("Módulos padrão criados");
