@@ -15,11 +15,13 @@ import org.hibernate.annotations.Comment;
 import java.util.UUID;
 
 /**
- * Empresa cliente do SaaS (tenant). Cada tenant tem dados isolados.
- * Codagis é a dona do SaaS e vende para outras empresas.
+ * Entidade que representa Tenant no sistema VendaLume.
  *
  * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
  */
+
 @Entity
 @Table(name = "tenants", indexes = {
         @Index(name = "idx_tenant_active", columnList = "active"),
@@ -31,6 +33,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
+
 public class Tenant extends BaseAuditableEntity {
 
     @Id

@@ -6,6 +6,14 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Configuração JacksonConfig.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
+
 @Configuration
 public class JacksonConfig {
 

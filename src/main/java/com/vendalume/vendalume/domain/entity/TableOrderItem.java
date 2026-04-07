@@ -8,12 +8,13 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 /**
- * Entidade que representa um item de uma comanda (pedido de mesa).
+ * Entidade que representa TableOrderItem no sistema VendaLume.
  *
  * @author VendaLume
  * @version 1.0.0
- * @since 2025-02-21
+ * @since 2025-02-16
  */
+
 @Entity
 @Table(name = "table_order_item", indexes = {
     @Index(name = "idx_table_order_item_order", columnList = "order_id"),
@@ -27,6 +28,7 @@ import java.util.UUID;
 @Builder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(exclude = "order")
+
 public class TableOrderItem {
 
     @Id

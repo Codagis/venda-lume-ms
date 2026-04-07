@@ -31,6 +31,7 @@ import java.util.UUID;
  * @version 1.0.0
  * @since 2025-02-16
  */
+
 @Entity
 @Table(
         name = "products",
@@ -60,6 +61,7 @@ import java.util.UUID;
 @SuperBuilder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @ToString
+
 public class Product extends BaseAuditableEntity {
 
     @Comment("Identificador único do produto")

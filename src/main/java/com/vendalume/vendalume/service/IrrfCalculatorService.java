@@ -6,10 +6,13 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 /**
- * Cálculo do IRRF (Imposto de Renda Retido na Fonte) conforme tabela vigente no Brasil.
- * Tabela progressiva mensal - Lei vigente (2025, jan-abr).
- * Base: total de rendimentos - INSS - (dependentes × R$ 189,59).
+ * Serviço de negócio IrrfCalculatorService.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
  */
+
 @Service
 public class IrrfCalculatorService {
 

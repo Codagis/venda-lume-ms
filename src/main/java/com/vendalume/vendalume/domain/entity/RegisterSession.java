@@ -8,12 +8,13 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * Sessão de PDV: registro de abertura/fechamento do caixa por um operador para auditoria e histórico.
+ * Entidade que representa RegisterSession no sistema VendaLume.
  *
  * @author VendaLume
  * @version 1.0.0
- * @since 2025-03-05
+ * @since 2025-02-16
  */
+
 @Entity
 @Table(
     name = "register_session",
@@ -31,6 +32,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+
 public class RegisterSession {
 
     @Id

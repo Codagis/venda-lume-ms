@@ -15,6 +15,14 @@ import org.hibernate.annotations.Comment;
 import java.math.BigDecimal;
 import java.util.UUID;
 
+/**
+ * Entidade que representa CardMachine no sistema VendaLume.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
+
 @Entity
 @Table(name = "card_machines", indexes = {
         @Index(name = "idx_card_machine_tenant", columnList = "tenant_id"),
@@ -25,6 +33,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
+
 public class CardMachine extends BaseAuditableEntity {
 
     @Id

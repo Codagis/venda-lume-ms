@@ -5,6 +5,14 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 
+/**
+ * Objeto de transferência (DTO) interno ao serviço: SimpleReceiptItemDto.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
+
 @Data
 @Builder
 public class SimpleReceiptItemDto {

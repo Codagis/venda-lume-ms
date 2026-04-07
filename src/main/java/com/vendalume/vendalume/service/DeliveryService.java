@@ -246,6 +246,72 @@ public class DeliveryService {
         return toResponse(delivery);
     }
 
+    @Transactional
+    public DeliveryResponse update(UUID id, DeliveryUpdateRequest request) {
+        Delivery delivery = findDeliveryOrThrow(id);
+        if (delivery.getStatus() == DeliveryStatus.CANCELLED) {
+            throw new IllegalArgumentException("Não é possível editar uma entrega cancelada.");
+        }
+        if (delivery.getStatus() == DeliveryStatus.DELIVERED) {
+            throw new IllegalArgumentException("Não é possível editar uma entrega já entregue.");
+        }
+
+        if (request.getRecipientName() != null) {
+            String v = request.getRecipientName().trim();
+            if (!v.isBlank()) delivery.setRecipientName(v.length() > 150 ? v.substring(0, 150) : v);
+        }
+        if (request.getRecipientPhone() != null) {
+            String v = request.getRecipientPhone().trim();
+            delivery.setRecipientPhone(v.length() > 20 ? v.substring(0, 20) : v);
+        }
+        if (request.getAddress() != null) {
+            String v = request.getAddress().trim();
+            if (!v.isBlank()) delivery.setAddress(v);
+        }
+        if (request.getComplement() != null) {
+            String v = request.getComplement().trim();
+            delivery.setComplement(v.isBlank() ? null : (v.length() > 255 ? v.substring(0, 255) : v));
+        }
+        if (request.getZipCode() != null) {
+            String v = request.getZipCode().trim();
+            delivery.setZipCode(v.isBlank() ? null : (v.length() > 10 ? v.substring(0, 10) : v));
+        }
+        if (request.getNeighborhood() != null) {
+            String v = request.getNeighborhood().trim();
+            delivery.setNeighborhood(v.isBlank() ? null : (v.length() > 100 ? v.substring(0, 100) : v));
+        }
+        if (request.getCity() != null) {
+            String v = request.getCity().trim();
+            delivery.setCity(v.isBlank() ? null : (v.length() > 100 ? v.substring(0, 100) : v));
+        }
+        if (request.getState() != null) {
+            String v = request.getState().trim().toUpperCase();
+            delivery.setState(v.isBlank() ? null : v.substring(0, Math.min(2, v.length())));
+        }
+        if (request.getInstructions() != null) {
+            String v = request.getInstructions().trim();
+            delivery.setInstructions(v.isBlank() ? null : v);
+        }
+        if (request.getScheduledAt() != null || request.getScheduledAt() == null) {
+            // permite limpar agendamento mandando null explicitamente
+            delivery.setScheduledAt(request.getScheduledAt());
+        }
+        if (request.getPriority() != null) {
+            delivery.setPriority(request.getPriority());
+        }
+        if (request.getDeliveryFee() != null) {
+            delivery.setDeliveryFee(request.getDeliveryFee());
+        }
+
+        // Mudança de endereço invalida coordenadas armazenadas (se existirem), forçando recálculo pelo mapa.
+        delivery.setLatitude(null);
+        delivery.setLongitude(null);
+
+        delivery.setUpdatedBy(SecurityUtils.getCurrentUserId());
+        delivery = deliveryRepository.save(delivery);
+        return toResponse(delivery);
+    }
+
     @Transactional(readOnly = true)
     public List<DeliveryResponse> listMyDeliveries() {
         UUID userId = SecurityUtils.getCurrentUserId();
@@ -298,11 +364,22 @@ public class DeliveryService {
         if (tenantId == null) {
             return List.of();
         }
-        List<Sale> sales = saleRepository.findByTenantIdAndStatus(tenantId, SaleStatus.COMPLETED);
+        // Dropdown do FE: somente vendas do tipo DELIVERY que ainda não possuem entrega.
+        // Não exigimos status COMPLETED, pois a entrega pode ser criada antes do pagamento;
+        // apenas excluímos CANCELLED.
+        var pageable = PageRequest.of(
+                0,
+                200,
+                org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "saleDate")
+        );
+        Specification<Sale> spec = (root, query, cb) -> cb.and(
+                cb.equal(root.get("tenantId"), tenantId),
+                cb.equal(root.get("saleType"), SaleType.DELIVERY),
+                cb.notEqual(root.get("status"), SaleStatus.CANCELLED)
+        );
+        List<Sale> sales = saleRepository.findAll(spec, pageable).getContent();
         List<Sale> withoutDelivery = sales.stream()
-                .filter(s -> s.getSaleType() == SaleType.DELIVERY)
                 .filter(s -> deliveryRepository.findBySaleId(s.getId()).isEmpty())
-                .limit(50)
                 .toList();
         return withoutDelivery.stream()
                 .map(s -> saleService.getById(s.getId()))

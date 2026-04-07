@@ -22,8 +22,13 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Gera contas a pagar recorrentes mensais (folha) a partir dos funcionários ativos.
+ * Serviço de negócio PayrollService.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
  */
+
 @Service
 @RequiredArgsConstructor
 public class PayrollService {

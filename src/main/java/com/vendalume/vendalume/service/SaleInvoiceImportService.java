@@ -33,6 +33,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Serviço de negócio SaleInvoiceImportService.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -100,10 +108,8 @@ public class SaleInvoiceImportService {
                     .build();
             payable = costControlService.createPayable(apReq);
         } else {
-            // Default: cria venda (para XML emitida pelo tenant ou import por JSON).
             Product importProduct = ensureImportProduct(resolvedTenantId);
 
-            // Garante que o total da venda bata com o total da nota no MVP (1 item).
             importProduct.setUnitPrice(extract.total);
             importProduct.setUpdatedBy(SecurityUtils.getCurrentUserId());
             productRepository.save(importProduct);
@@ -111,7 +117,7 @@ public class SaleInvoiceImportService {
             SaleCreateRequest req = SaleCreateRequest.builder()
                     .tenantId(SecurityUtils.isCurrentUserRoot() ? resolvedTenantId : null)
                     .saleType(saleType != null ? saleType : SaleType.PDV)
-                    .status(SaleStatus.OPEN) // evita exigir paymentMethod na importação
+                    .status(SaleStatus.OPEN)
                     .items(java.util.List.of(SaleItemRequest.builder()
                             .productId(importProduct.getId())
                             .quantity(BigDecimal.ONE)
@@ -210,7 +216,7 @@ public class SaleInvoiceImportService {
                     p.setTenantId(tenantId);
                     p.setSku(IMPORT_PRODUCT_SKU);
                     p.setName("Venda importada de NF-e");
-                    p.setUnitPrice(BigDecimal.ONE); // o preço real é resolvido via SaleService; mantemos válido
+                    p.setUnitPrice(BigDecimal.ONE);
                     p.setActive(true);
                     p.setAvailableForSale(true);
                     p.setAvailableForDelivery(false);

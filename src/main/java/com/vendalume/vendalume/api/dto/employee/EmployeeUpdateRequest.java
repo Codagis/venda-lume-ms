@@ -13,6 +13,14 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
+/**
+ * Objeto de transferência (DTO) EmployeeUpdateRequest.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
+
 @Data
 @Builder
 @NoArgsConstructor

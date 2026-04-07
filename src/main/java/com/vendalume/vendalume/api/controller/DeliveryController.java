@@ -128,4 +128,12 @@ public class DeliveryController {
             @Valid @RequestBody DeliveryStatusUpdateRequest request) {
         return ResponseEntity.ok(deliveryService.updateStatus(id, request));
     }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Editar entrega", description = "Atualiza endereço, destinatário, instruções, agendamento e prioridade.")
+    public ResponseEntity<DeliveryResponse> update(
+            @PathVariable UUID id,
+            @Valid @RequestBody DeliveryUpdateRequest request) {
+        return ResponseEntity.ok(deliveryService.update(id, request));
+    }
 }

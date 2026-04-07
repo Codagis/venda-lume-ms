@@ -7,12 +7,13 @@ import lombok.experimental.SuperBuilder;
 import java.util.UUID;
 
 /**
- * Entidade que representa um fornecedor no sistema VendaLume.
+ * Entidade que representa Supplier no sistema VendaLume.
  *
  * @author VendaLume
  * @version 1.0.0
- * @since 2025-02-18
+ * @since 2025-02-16
  */
+
 @Entity
 @Table(name = "suppliers", indexes = {
     @Index(name = "idx_supplier_tenant_active", columnList = "tenant_id, active"),
@@ -25,6 +26,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @SuperBuilder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
+
 public class Supplier extends BaseAuditableEntity {
 
     @Id

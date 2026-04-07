@@ -6,8 +6,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Representa uma folha de pagamento já gerada (existe ao menos uma conta a pagar com essa referência).
+ * Objeto de transferência (DTO) GeneratedPayrollDto.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
  */
+
 @Data
 @Builder
 @NoArgsConstructor

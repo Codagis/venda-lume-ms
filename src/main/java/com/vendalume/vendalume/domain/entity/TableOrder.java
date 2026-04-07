@@ -13,12 +13,13 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Entidade que representa uma comanda (pedido de mesa).
+ * Entidade que representa TableOrder no sistema VendaLume.
  *
  * @author VendaLume
  * @version 1.0.0
- * @since 2025-02-21
+ * @since 2025-02-16
  */
+
 @Entity
 @Table(name = "table_order", indexes = {
     @Index(name = "idx_table_order_tenant", columnList = "tenant_id"),
@@ -36,6 +37,7 @@ import java.util.UUID;
 @SuperBuilder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @ToString(exclude = "items")
+
 public class TableOrder extends BaseAuditableEntity {
 
     @Id

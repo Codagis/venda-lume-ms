@@ -9,12 +9,13 @@ import org.hibernate.annotations.Comment;
 import java.util.UUID;
 
 /**
- * Entidade que representa uma mesa do restaurante.
+ * Entidade que representa RestaurantTable no sistema VendaLume.
  *
  * @author VendaLume
  * @version 1.0.0
- * @since 2025-02-21
+ * @since 2025-02-16
  */
+
 @Entity
 @Table(name = "restaurant_table", indexes = {
     @Index(name = "idx_restaurant_table_tenant", columnList = "tenant_id"),
@@ -29,6 +30,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @SuperBuilder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
+
 public class RestaurantTable extends BaseAuditableEntity {
 
     @Id

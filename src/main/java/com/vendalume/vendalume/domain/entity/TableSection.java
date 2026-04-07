@@ -8,12 +8,13 @@ import org.hibernate.annotations.Comment;
 import java.util.UUID;
 
 /**
- * Entidade que representa uma seção de mesas no restaurante.
+ * Entidade que representa TableSection no sistema VendaLume.
  *
  * @author VendaLume
  * @version 1.0.0
- * @since 2025-02-21
+ * @since 2025-02-16
  */
+
 @Entity
 @Table(name = "table_section", indexes = {
     @Index(name = "idx_table_section_tenant", columnList = "tenant_id"),
@@ -26,6 +27,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @SuperBuilder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
+
 public class TableSection extends BaseAuditableEntity {
 
     @Id

@@ -10,6 +10,14 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * Entidade que representa Register no sistema VendaLume.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
+
 @Entity
 @Table(
     name = "registers",
@@ -28,6 +36,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
+
 public class Register extends BaseAuditableEntity {
 
     @Id

@@ -24,13 +24,13 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 /**
- * Entidade que representa um item individual de uma venda. Armazena quantidade, preços,
- * descontos e snapshot do produto para histórico imutável.
+ * Entidade que representa SaleItem no sistema VendaLume.
  *
  * @author VendaLume
  * @version 1.0.0
  * @since 2025-02-16
  */
+
 @Entity
 @Table(
         name = "sale_items",
@@ -46,6 +46,7 @@ import java.util.UUID;
 @Builder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(exclude = "sale")
+
 public class SaleItem {
 
     @Comment("Identificador único do item")

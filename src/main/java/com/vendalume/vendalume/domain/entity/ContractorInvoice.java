@@ -10,9 +10,13 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * Nota fiscal de prestador de serviço PJ.
- * Arquivo (PDF/XML) armazenado no Google Cloud Storage para conformidade legal (Lei 8.212/91, Lei 10.833/03).
+ * Entidade que representa ContractorInvoice no sistema VendaLume.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
  */
+
 @Entity
 @Table(name = "contractor_invoices", indexes = {
     @Index(name = "idx_contractor_invoice_tenant", columnList = "tenant_id"),
@@ -25,6 +29,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @SuperBuilder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
+
 public class ContractorInvoice extends BaseAuditableEntity {
 
     @Id

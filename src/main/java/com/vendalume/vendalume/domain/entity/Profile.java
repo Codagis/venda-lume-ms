@@ -14,11 +14,13 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Perfil de acesso: conjunto de permissões. Pode ser por tenant (tenant_id preenchido)
- * ou do sistema (tenant_id null). Usuários são vinculados a um perfil.
+ * Entidade que representa Profile no sistema VendaLume.
  *
  * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
  */
+
 @Entity
 @Table(name = "profiles", indexes = {
         @Index(name = "idx_profile_tenant", columnList = "tenant_id"),
@@ -29,6 +31,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
+
 public class Profile extends BaseAuditableEntity {
 
     @Id

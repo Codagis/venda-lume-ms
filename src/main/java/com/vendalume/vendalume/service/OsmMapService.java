@@ -129,8 +129,14 @@ public class OsmMapService {
         List<String> parts = new ArrayList<>();
         String addr = d.getAddress() != null ? d.getAddress().trim() : "";
         if (!addr.isBlank()) {
-            String street = addr.split("\\s*-\\s*")[0].trim().replaceAll("CEP:.*$", "").trim();
+            String[] split = addr.split("\\s*-\\s*");
+            String street = split[0].trim().replaceAll("CEP:.*$", "").trim();
             if (!street.isBlank()) parts.add(street);
+            // Se o usuário digitou "Rua, nº - Bairro" no campo address, aproveita o bairro quando o campo específico estiver vazio.
+            if ((d.getNeighborhood() == null || d.getNeighborhood().isBlank()) && split.length > 1) {
+                String maybeNeighborhood = split[1].trim();
+                if (!maybeNeighborhood.isBlank()) parts.add(maybeNeighborhood);
+            }
         }
         if (d.getNeighborhood() != null && !d.getNeighborhood().isBlank()) parts.add(d.getNeighborhood().trim());
         if (d.getCity() != null && !d.getCity().isBlank()) parts.add(d.getCity().trim());
@@ -144,7 +150,27 @@ public class OsmMapService {
      * Se houver endereço da empresa, inclui origem e métricas. Caso contrário, só o destino.
      */
     public DeliveryMapOsmResponse fetchMapData(String originAddress, DeliveryResponse delivery) {
-        String destAddress = buildFullAddress(delivery);
+        // Se city/UF estiverem vazios na entrega, tenta inferir do endereço de origem (empresa),
+        // o que melhora muito o acerto do Nominatim quando o usuário informa só "Rua, número - Bairro".
+        DeliveryResponse d = delivery;
+        if (d != null && (d.getCity() == null || d.getCity().isBlank() || d.getState() == null || d.getState().isBlank())
+                && originAddress != null && !originAddress.isBlank()) {
+            String[] parts = originAddress.split(",");
+            String inferredState = null;
+            String inferredCity = null;
+            if (parts.length >= 2) {
+                String last = parts[parts.length - 1].trim();
+                if (last.length() == 2) inferredState = last.toUpperCase(Locale.ROOT);
+            }
+            if (parts.length >= 3) {
+                String maybeCity = parts[parts.length - 2].trim();
+                if (!maybeCity.isBlank()) inferredCity = maybeCity;
+            }
+            if ((d.getCity() == null || d.getCity().isBlank()) && inferredCity != null) d.setCity(inferredCity);
+            if ((d.getState() == null || d.getState().isBlank()) && inferredState != null) d.setState(inferredState);
+        }
+
+        String destAddress = buildFullAddress(d);
         if (destAddress == null || destAddress.isBlank()) {
             return null;
         }

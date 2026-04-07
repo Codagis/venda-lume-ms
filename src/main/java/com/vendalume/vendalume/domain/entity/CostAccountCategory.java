@@ -8,6 +8,14 @@ import org.hibernate.annotations.Comment;
 
 import java.util.UUID;
 
+/**
+ * Entidade que representa CostAccountCategory no sistema VendaLume.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
+
 @Entity
 @Table(name = "cost_account_category", indexes = {
         @Index(name = "idx_ccc_tenant_kind", columnList = "tenant_id, kind"),
@@ -19,6 +27,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @SuperBuilder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
+
 public class CostAccountCategory extends BaseAuditableEntity {
 
     @Id

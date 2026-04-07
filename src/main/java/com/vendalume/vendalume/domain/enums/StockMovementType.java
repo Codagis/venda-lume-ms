@@ -2,6 +2,14 @@ package com.vendalume.vendalume.domain.enums;
 
 import lombok.Getter;
 
+/**
+ * Enumeração StockMovementType.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
+
 @Getter
 public enum StockMovementType {
 

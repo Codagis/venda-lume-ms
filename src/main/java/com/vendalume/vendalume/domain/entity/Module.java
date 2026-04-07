@@ -15,12 +15,13 @@ import org.hibernate.annotations.Comment;
 import java.util.UUID;
 
 /**
- * Módulo do sistema: representa uma tela/rota no frontend.
- * O frontend usa a lista de módulos para montar rotas e menu dinamicamente.
- * Cada módulo exige uma permissão de visualização (view_permission_code).
+ * Entidade que representa Module no sistema VendaLume.
  *
  * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
  */
+
 @Entity
 @Table(name = "modules", indexes = {
         @Index(name = "idx_module_active", columnList = "active"),
@@ -31,6 +32,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
+
 public class Module extends BaseAuditableEntity {
 
     @Id

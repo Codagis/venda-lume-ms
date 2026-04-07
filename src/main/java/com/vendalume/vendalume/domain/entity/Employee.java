@@ -10,9 +10,13 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 /**
- * Funcionário do tenant. Possui salário e dia de vencimento para geração
- * de contas a pagar recorrentes mensais (folha de pagamento).
+ * Entidade que representa Employee no sistema VendaLume.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
  */
+
 @Entity
 @Table(name = "employees", indexes = {
     @Index(name = "idx_employee_tenant_active", columnList = "tenant_id, active"),
@@ -25,6 +29,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @SuperBuilder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
+
 public class Employee extends BaseAuditableEntity {
 
     @Id

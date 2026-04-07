@@ -14,6 +14,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Controller REST que expõe os endpoints relacionados a FiscalDocumentsController.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
+
 @Tag(name = "Fiscal", description = "Consulta de NF-e/NFC-e (emitidas e recebidas) via Fiscal Simplify/Nuvem Fiscal")
 @DefaultApiResponses
 @RestController

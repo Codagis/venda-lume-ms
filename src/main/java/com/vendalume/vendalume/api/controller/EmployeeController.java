@@ -15,6 +15,14 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+/**
+ * Controller REST que expõe os endpoints relacionados a EmployeeController.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
+
 @Tag(name = "Funcionários", description = "Cadastro de funcionários e folha de pagamento")
 @DefaultApiResponses
 @RestController

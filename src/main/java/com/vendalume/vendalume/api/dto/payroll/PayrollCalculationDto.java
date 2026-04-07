@@ -8,8 +8,13 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 
 /**
- * Resultado do cálculo de folha para um funcionário (proventos, INSS, IRRF por lei, descontos, líquido).
+ * Objeto de transferência (DTO) PayrollCalculationDto.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
  */
+
 @Data
 @Builder
 @NoArgsConstructor

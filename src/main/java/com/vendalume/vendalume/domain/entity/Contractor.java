@@ -8,9 +8,13 @@ import org.hibernate.annotations.Comment;
 import java.util.UUID;
 
 /**
- * Prestador de serviço PJ (pessoa jurídica) registrado pela empresa.
- * Conforme legislação: guarda de dados do prestador e das notas fiscais de serviço.
+ * Entidade que representa Contractor no sistema VendaLume.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
  */
+
 @Entity
 @Table(name = "contractors", indexes = {
     @Index(name = "idx_contractor_tenant_active", columnList = "tenant_id, active"),
@@ -23,6 +27,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @SuperBuilder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
+
 public class Contractor extends BaseAuditableEntity {
 
     @Id

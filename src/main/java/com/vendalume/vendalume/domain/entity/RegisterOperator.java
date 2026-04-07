@@ -6,6 +6,14 @@ import lombok.*;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Entidade que representa RegisterOperator no sistema VendaLume.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
+
 @Entity
 @Table(
     name = "register_operators",
@@ -24,6 +32,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+
 public class RegisterOperator {
 
     @EqualsAndHashCode.Include

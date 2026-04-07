@@ -27,15 +27,13 @@ import java.util.Collections;
 import java.util.UUID;
 
 /**
- * Entidade que representa um usuário do sistema VendaLume. Implementa {@code UserDetails} para
- * integração com Spring Security. Suporta autenticação por username/senha, multi-tenancy,
- * controle de tentativas de login, bloqueio temporário, 2FA e auditoria completa.
+ * Entidade que representa User no sistema VendaLume.
  *
  * @author VendaLume
  * @version 1.0.0
  * @since 2025-02-16
- * @see org.springframework.security.core.userdetails.UserDetails
  */
+
 @Entity
 @Table(
         name = "users",
@@ -62,6 +60,7 @@ import java.util.UUID;
 @SuperBuilder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @ToString(exclude = {"passwordHash", "twoFactorSecret"})
+
 public class User extends BaseAuditableEntity implements UserDetails {
 
     @Comment("Identificador único do usuário")

@@ -31,13 +31,13 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Entidade que representa uma venda no sistema VendaLume. Suporta PDV, delivery, retirada e online,
- * com fluxo completo de status, pagamentos, descontos, entregas e auditoria.
+ * Entidade que representa Sale no sistema VendaLume.
  *
  * @author VendaLume
  * @version 1.0.0
  * @since 2025-02-16
  */
+
 @Entity
 @Table(
         name = "sales",
@@ -60,6 +60,7 @@ import java.util.UUID;
 @SuperBuilder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @ToString(exclude = "items")
+
 public class Sale extends BaseAuditableEntity {
 
     @Comment("Identificador único da venda")

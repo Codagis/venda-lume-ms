@@ -10,12 +10,13 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * Entidade que representa uma reserva de mesa.
+ * Entidade que representa Reservation no sistema VendaLume.
  *
  * @author VendaLume
  * @version 1.0.0
- * @since 2025-02-21
+ * @since 2025-02-16
  */
+
 @Entity
 @Table(name = "reservation", indexes = {
     @Index(name = "idx_reservation_tenant", columnList = "tenant_id"),
@@ -30,6 +31,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @SuperBuilder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
+
 public class Reservation extends BaseAuditableEntity {
 
     @Id

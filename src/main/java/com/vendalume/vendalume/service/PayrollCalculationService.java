@@ -9,8 +9,13 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 /**
- * Calcula proventos, INSS, IRRF (por lei) e líquido para um funcionário.
+ * Serviço de negócio PayrollCalculationService.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
  */
+
 @Service
 @RequiredArgsConstructor
 public class PayrollCalculationService {

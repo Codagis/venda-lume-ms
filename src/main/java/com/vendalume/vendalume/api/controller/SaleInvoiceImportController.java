@@ -16,6 +16,14 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Controller REST que expõe os endpoints relacionados a SaleInvoiceImportController.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
+
 @Tag(name = "Vendas", description = "Importação de venda a partir de Nota Fiscal (PDF/XML/JSON)")
 @DefaultApiResponses
 @RestController

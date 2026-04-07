@@ -12,12 +12,13 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 /**
- * Entidade que representa uma conta a receber no sistema VendaLume.
+ * Entidade que representa AccountReceivable no sistema VendaLume.
  *
  * @author VendaLume
  * @version 1.0.0
- * @since 2025-02-18
+ * @since 2025-02-16
  */
+
 @Entity
 @Table(name = "account_receivable", indexes = {
     @Index(name = "idx_ar_tenant_status", columnList = "tenant_id, status"),
@@ -32,6 +33,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @SuperBuilder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
+
 public class AccountReceivable extends BaseAuditableEntity {
 
     @Id

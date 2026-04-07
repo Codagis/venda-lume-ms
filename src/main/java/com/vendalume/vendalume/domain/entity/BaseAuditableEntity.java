@@ -16,20 +16,20 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * Classe base abstrata para entidades com suporte a auditoria e controle de concorrência otimista.
- * Fornece campos padronizados de criação, alteração e versionamento para todas as entidades
- * que necessitam rastreabilidade e prevenção de conflitos em ambientes concorrentes.
+ * Entidade que representa BaseAuditableEntity no sistema VendaLume.
  *
  * @author VendaLume
  * @version 1.0.0
  * @since 2025-02-16
  */
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
 @MappedSuperclass
+
 public abstract class BaseAuditableEntity {
 
     @Comment("Data e hora de criação do registro")

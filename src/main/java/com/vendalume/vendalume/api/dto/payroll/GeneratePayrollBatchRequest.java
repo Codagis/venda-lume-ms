@@ -14,8 +14,13 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * DTO para gerar contas a pagar de folha para funcionários e meses específicos.
+ * Objeto de transferência (DTO) GeneratePayrollBatchRequest.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
  */
+
 @Data
 @Builder
 @NoArgsConstructor

@@ -7,9 +7,13 @@ import java.math.BigDecimal;
 import java.util.List;
 
 /**
- * Contexto para renderização do template Thymeleaf do cupom fiscal.
- * Variáveis alinhadas ao template de cupom fiscal completo.
+ * Objeto de transferência (DTO) interno ao serviço: ReceiptPdfContext.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
  */
+
 @Data
 @Builder
 public class ReceiptPdfContext {

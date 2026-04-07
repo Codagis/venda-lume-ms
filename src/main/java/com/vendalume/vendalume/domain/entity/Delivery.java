@@ -28,14 +28,13 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
- * Entidade que representa uma entrega de delivery no sistema VendaLume. Controla o ciclo completo
- * desde a atribuição do entregador até a confirmação da entrega, com endereço, rota, taxas
- * e comprovantes.
+ * Entidade que representa Delivery no sistema VendaLume.
  *
  * @author VendaLume
  * @version 1.0.0
  * @since 2025-02-16
  */
+
 @Entity
 @Table(
         name = "deliveries",
@@ -59,6 +58,7 @@ import java.util.UUID;
 @SuperBuilder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @ToString(exclude = {"sale", "deliveryPerson"})
+
 public class Delivery extends BaseAuditableEntity {
 
     @Comment("Identificador único da entrega")

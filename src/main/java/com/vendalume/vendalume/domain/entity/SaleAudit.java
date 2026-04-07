@@ -17,6 +17,14 @@ import org.hibernate.annotations.Comment;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Entidade que representa SaleAudit no sistema VendaLume.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
+
 @Entity
 @Table(name = "sale_audit", indexes = {
         @Index(name = "idx_sale_audit_sale_id", columnList = "sale_id"),
@@ -27,6 +35,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+
 public class SaleAudit {
 
     @Id

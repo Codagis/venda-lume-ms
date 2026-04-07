@@ -8,6 +8,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Repositório Spring Data JPA para CostAccountCategoryRepository.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
+
 public interface CostAccountCategoryRepository extends JpaRepository<CostAccountCategory, UUID> {
 
     List<CostAccountCategory> findByTenantIdAndKindOrderByDisplayOrderAscNameAsc(UUID tenantId, CostCategoryKind kind);

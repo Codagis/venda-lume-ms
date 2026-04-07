@@ -3,8 +3,13 @@ package com.vendalume.vendalume.domain.enums;
 import lombok.Getter;
 
 /**
- * Tipo de equipamento do ponto de venda (caixa).
+ * Enumeração EquipmentType.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
  */
+
 @Getter
 public enum EquipmentType {
 

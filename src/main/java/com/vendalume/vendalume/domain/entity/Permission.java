@@ -17,10 +17,13 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * Permissão granular do sistema. Agrupadas por módulo (PRODUCTS, SALES, etc).
+ * Entidade que representa Permission no sistema VendaLume.
  *
  * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
  */
+
 @Entity
 @Table(name = "permissions",
         indexes = @Index(name = "idx_permission_module", columnList = "module"),
@@ -30,6 +33,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
+
 public class Permission {
 
     @Id

@@ -4,9 +4,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 /**
- * Corpo da requisição para iniciar sessão do PDV.
- * Se o PDV tiver senha de acesso configurada, pdvPassword é obrigatório.
+ * Objeto de transferência (DTO) StartSessionRequest.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
  */
+
 @Data
 @Schema(description = "Dados para iniciar sessão do PDV")
 public class StartSessionRequest {

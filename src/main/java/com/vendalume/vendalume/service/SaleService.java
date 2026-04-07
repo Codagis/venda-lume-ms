@@ -166,7 +166,14 @@ public class SaleService {
         totalDiscount = totalDiscount.add(saleDiscountAmt);
 
         BigDecimal deliveryFee = request.getDeliveryFee() != null ? request.getDeliveryFee() : BigDecimal.ZERO;
-        BigDecimal total = subtotal.subtract(totalDiscount).add(totalTax).add(deliveryFee);
+        BigDecimal totalBase = subtotal.subtract(totalDiscount).add(totalTax).add(deliveryFee);
+        BigDecimal total = applyCardSurchargesIfNeeded(
+                tenantId,
+                request.getPaymentMethod(),
+                request.getInstallmentsCount(),
+                request.getCardMachineId(),
+                totalBase
+        );
 
         sale.setSubtotal(subtotal);
         sale.setDiscountAmount(totalDiscount);
@@ -441,7 +448,14 @@ public class SaleService {
             deliveryFeeVal = request.getDeliveryFee();
         }
 
-        BigDecimal total = subtotal.subtract(discountAmt).add(deliveryFeeVal).max(BigDecimal.ZERO);
+        BigDecimal totalBase = subtotal.subtract(discountAmt).add(deliveryFeeVal).max(BigDecimal.ZERO);
+        BigDecimal total = applyCardSurchargesIfNeeded(
+                sale.getTenantId(),
+                request.getPaymentMethod(),
+                request.getInstallmentsCount(),
+                request.getCardMachineId(),
+                totalBase
+        );
         BigDecimal amountReceived = request.getAmountReceived() != null ? request.getAmountReceived() : total;
 
         sale.setDiscountAmount(discountAmt);
@@ -462,6 +476,64 @@ public class SaleService {
         logSaleAudit(sale.getId(), SaleAuditEventType.UPDATED, SecurityUtils.getCurrentUserId(),
                 "Pagamento adicionado. Venda concluída.");
         return toResponse(sale);
+    }
+
+    /**
+     * Aplica acréscimos de cartão (juros do parcelamento + taxa da maquininha) ao total base da venda.
+     * Regra:
+     * - Se pagamento não for CARTÃO DE CRÉDITO, retorna totalBase.
+     * - Se parcelas <= maxInstallmentsNoInterest, não aplica juros.
+     * - Se houver juros, calcula "profissional" via fórmula PMT no prazo total (n).
+     * - Taxa da maquininha (PERCENTAGE/FIXED_AMOUNT) é aplicada sobre o total já com juros.
+     */
+    private BigDecimal applyCardSurchargesIfNeeded(
+            UUID tenantId,
+            PaymentMethod paymentMethod,
+            Integer installmentsCount,
+            UUID cardMachineId,
+            BigDecimal totalBase
+    ) {
+        if (totalBase == null) totalBase = BigDecimal.ZERO;
+        if (paymentMethod != PaymentMethod.CREDIT_CARD) return totalBase;
+
+        int n = installmentsCount != null && installmentsCount > 0 ? installmentsCount : 1;
+
+        Tenant tenant = tenantRepository.findById(tenantId)
+                .orElseThrow(() -> new IllegalArgumentException("Empresa não encontrada."));
+        CardMachine cm = null;
+        if (cardMachineId != null) {
+            cm = cardMachineRepository.findByIdAndTenantId(cardMachineId, tenantId).orElse(null);
+        }
+
+        int maxNoInterest = cm != null && cm.getMaxInstallmentsNoInterest() != null
+                ? cm.getMaxInstallmentsNoInterest()
+                : (tenant.getMaxInstallmentsNoInterest() != null ? tenant.getMaxInstallmentsNoInterest() : 1);
+        java.math.BigDecimal interestRatePct = cm != null && cm.getInterestRatePercent() != null
+                ? cm.getInterestRatePercent()
+                : (tenant.getInterestRatePercent() != null ? tenant.getInterestRatePercent() : java.math.BigDecimal.ZERO);
+
+        boolean hasInterest = n > maxNoInterest && interestRatePct.compareTo(java.math.BigDecimal.ZERO) > 0;
+        BigDecimal totalWithInterest = totalBase;
+        if (hasInterest) {
+            BigDecimal i = interestRatePct.divide(BigDecimal.valueOf(100), 12, RoundingMode.HALF_UP);
+            // PMT: parcela = PV * i*(1+i)^n / ((1+i)^n - 1)
+            double id = i.doubleValue();
+            double pow = Math.pow(1.0 + id, n);
+            double installment = totalBase.doubleValue() * (id * pow) / (pow - 1.0);
+            totalWithInterest = BigDecimal.valueOf(installment * n).setScale(4, RoundingMode.HALF_UP);
+        }
+
+        String feeType = cm != null && cm.getFeeType() != null ? cm.getFeeType() : tenant.getCardFeeType();
+        java.math.BigDecimal feeValue = cm != null && cm.getFeeValue() != null ? cm.getFeeValue() : tenant.getCardFeeValue();
+        BigDecimal cardFee = BigDecimal.ZERO;
+        if (feeType != null && feeValue != null) {
+            if ("PERCENTAGE".equalsIgnoreCase(feeType)) {
+                cardFee = totalWithInterest.multiply(feeValue).divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
+            } else if ("FIXED_AMOUNT".equalsIgnoreCase(feeType)) {
+                cardFee = feeValue.setScale(4, RoundingMode.HALF_UP);
+            }
+        }
+        return totalWithInterest.add(cardFee).setScale(4, RoundingMode.HALF_UP);
     }
 
     @Transactional(readOnly = true)

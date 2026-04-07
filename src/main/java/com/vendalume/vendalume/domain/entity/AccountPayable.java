@@ -11,6 +11,14 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
+/**
+ * Entidade que representa AccountPayable no sistema VendaLume.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
+
 @Entity
 @Table(name = "account_payable", indexes = {
     @Index(name = "idx_ap_tenant_status", columnList = "tenant_id, status"),
@@ -25,6 +33,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @SuperBuilder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
+
 public class AccountPayable extends BaseAuditableEntity {
 
     @Id

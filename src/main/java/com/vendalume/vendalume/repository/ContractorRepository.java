@@ -11,6 +11,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Repositório Spring Data JPA para ContractorRepository.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
+
 @Repository
 public interface ContractorRepository extends JpaRepository<Contractor, UUID>, JpaSpecificationExecutor<Contractor> {
 

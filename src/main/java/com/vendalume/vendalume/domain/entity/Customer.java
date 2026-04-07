@@ -6,6 +6,14 @@ import lombok.experimental.SuperBuilder;
 
 import java.util.UUID;
 
+/**
+ * Entidade que representa Customer no sistema VendaLume.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
+
 @Entity
 @Table(name = "customers", indexes = {
     @Index(name = "idx_customer_tenant_active", columnList = "tenant_id, active"),
@@ -19,6 +27,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @SuperBuilder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
+
 public class Customer extends BaseAuditableEntity {
 
     @Id

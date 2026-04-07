@@ -19,6 +19,14 @@ import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Controller REST que expõe os endpoints relacionados a PayrollController.
+ *
+ * @author VendaLume
+ * @version 1.0.0
+ * @since 2025-02-16
+ */
+
 @Tag(name = "Folha de Pagamento", description = "Geração de contas a pagar recorrentes e relatório de folha")
 @RestController
 @RequestMapping("/payroll")
