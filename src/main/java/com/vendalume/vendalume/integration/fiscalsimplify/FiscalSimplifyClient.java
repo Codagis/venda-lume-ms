@@ -13,7 +13,8 @@ import reactor.core.Exceptions;
 import java.util.Map;
 
 /**
- * Cliente HTTP para integração com a API Fiscal Simplify.
+ * Cliente HTTP para a API Fiscal Simplify: empresas (emitentes), NFC-e, NF-e, certificados
+ * e obtenção de PDF do cupom/documento fiscal.
  *
  * @author VendaLume
  * @version 1.0.0

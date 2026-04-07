@@ -23,7 +23,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Serviço de integração com Fiscal Simplify.
+ * Serviço de negócio que orquestra a integração com a API Fiscal Simplify: sincronização de
+ * empresa (tenant), emissão de NFC-e e NF-e a partir de vendas e montagem dos payloads fiscais.
  *
  * @author VendaLume
  * @version 1.0.0
@@ -34,7 +35,6 @@ import java.util.Map;
 @Slf4j
 public class FiscalSimplifyService {
 
-    /** NCM válido na tabela SEFAZ - 22021000 = refrigerantes (padrão quando produto sem NCM) */
     private static final String NCM_PADRAO = "22021000";
     private static final String CFOP_PADRAO = "5102";
     private static final int CRT_PADRAO = 3;
@@ -48,10 +48,6 @@ public class FiscalSimplifyService {
     @Value("${vendalume.fiscal-simplify.enabled:true}")
     private boolean enabled;
 
-    /**
-     * Cadastra ou atualiza empresa no Fiscal Simplify a partir do Tenant.
-     * Opcionalmente configura NFC-e (CSC) e cadastra certificado PFX.
-     */
     public void syncTenantToFiscalSimplify(Tenant tenant, String certificadoPfxBase64, String certificadoPassword) {
         if (!enabled) return;
         if (tenant == null || tenant.getDocument() == null || tenant.getDocument().isBlank()) return;
@@ -127,9 +123,6 @@ public class FiscalSimplifyService {
         }
     }
 
-    /**
-     * Emite NFC-e para a venda e retorna o PDF do cupom fiscal.
-     */
     public byte[] emitirNfceEPdf(Sale sale, List<SaleItem> items) {
         if (!enabled) {
             throw new IllegalStateException("Integração Fiscal Simplify está desabilitada.");
@@ -160,8 +153,20 @@ public class FiscalSimplifyService {
                 ? parseSerie(tenant.getEcfSeries()) : SERIE_PADRAO);
         nfceReq.put("naturezaOperacao", "VENDA");
 
-        // Itens com dados do produto: código (SKU), descrição, NCM, quantidade e valor unitário.
+        BigDecimal totalVenda = sale.getTotal() != null ? sale.getTotal() : BigDecimal.ZERO;
+        totalVenda = totalVenda.setScale(2, java.math.RoundingMode.HALF_UP);
+        BigDecimal baseItens = BigDecimal.ZERO;
+        for (SaleItem item : items) {
+            BigDecimal qty = item.getQuantity() != null ? item.getQuantity() : BigDecimal.ONE;
+            BigDecimal vu = item.getUnitPrice() != null ? item.getUnitPrice() : BigDecimal.ZERO;
+            baseItens = baseItens.add(vu.multiply(qty));
+        }
+        BigDecimal ratio = (baseItens.compareTo(BigDecimal.ZERO) > 0)
+                ? totalVenda.divide(baseItens, 12, java.math.RoundingMode.HALF_UP)
+                : BigDecimal.ONE;
+
         List<Map<String, Object>> itens = new ArrayList<>();
+        BigDecimal acumulado = BigDecimal.ZERO;
         for (SaleItem item : items) {
             Product p = item.getProduct();
             String descricao = (item.getProductName() != null && !item.getProductName().isBlank())
@@ -173,9 +178,16 @@ public class FiscalSimplifyService {
                     : (p != null && p.getSku() != null && !p.getSku().isBlank() ? p.getSku() : null);
             String ncm = (p != null && p.getNcm() != null && p.getNcm().length() == 8) ? p.getNcm() : NCM_PADRAO;
             BigDecimal qty = item.getQuantity() != null ? item.getQuantity() : BigDecimal.ONE;
-            BigDecimal valorUnitario = item.getUnitPrice() != null ? item.getUnitPrice() : BigDecimal.ZERO;
+            BigDecimal valorUnitarioBase = item.getUnitPrice() != null ? item.getUnitPrice() : BigDecimal.ZERO;
+            BigDecimal valorUnitario = valorUnitarioBase.multiply(ratio).setScale(2, java.math.RoundingMode.HALF_UP);
             if (qty.compareTo(BigDecimal.ZERO) > 0 && valorUnitario.compareTo(BigDecimal.ZERO) == 0) {
-                valorUnitario = item.getTotal().divide(qty, 4, java.math.RoundingMode.HALF_UP);
+                valorUnitario = item.getTotal().divide(qty, 2, java.math.RoundingMode.HALF_UP);
+            }
+            if (itens.size() == items.size() - 1 && baseItens.compareTo(BigDecimal.ZERO) > 0) {
+                BigDecimal restante = totalVenda.subtract(acumulado);
+                if (qty.compareTo(BigDecimal.ZERO) > 0) {
+                    valorUnitario = restante.divide(qty, 2, java.math.RoundingMode.HALF_UP);
+                }
             }
 
             Map<String, Object> itemMap = new LinkedHashMap<>();
@@ -186,26 +198,24 @@ public class FiscalSimplifyService {
             itemMap.put("quantidade", qty);
             itemMap.put("valorUnitario", valorUnitario);
             itens.add(itemMap);
+            acumulado = acumulado.add(valorUnitario.multiply(qty));
         }
         nfceReq.put("itens", itens);
 
         List<Map<String, Object>> pagamentos = new ArrayList<>();
-        BigDecimal total = sale.getTotal() != null ? sale.getTotal() : BigDecimal.ZERO;
+        BigDecimal total = totalVenda;
         Map<String, Object> pag = new LinkedHashMap<>();
 
-        // PIX e demais formas que não são cartão: apenas forma + valor (nunca exige dados de cartão)
         if (sale.getPaymentMethod() == PaymentMethod.PIX || sale.getPaymentMethod() == PaymentMethod.CASH
                 || sale.getPaymentMethod() == PaymentMethod.CHECK || sale.getPaymentMethod() == PaymentMethod.BANK_TRANSFER
                 || sale.getPaymentMethod() == PaymentMethod.MEAL_VOUCHER || sale.getPaymentMethod() == PaymentMethod.FOOD_VOUCHER
                 || sale.getPaymentMethod() == PaymentMethod.CREDIT || sale.getPaymentMethod() == PaymentMethod.OTHER
                 || sale.getPaymentMethod() == null) {
-            // PIX sempre como "17" (tPag SEFAZ) — sem nenhum dado de cartão
             String formaNfce = (sale.getPaymentMethod() == PaymentMethod.PIX) ? "17" : mapPaymentMethodToFiscalNfce(sale.getPaymentMethod());
             pag.put("forma", formaNfce);
-            pag.put("valor", total);
+            pag.put("valor", total.setScale(2, java.math.RoundingMode.HALF_UP));
             pagamentos.add(pag);
         } else {
-            // Cartão (crédito/débito): só envia bloco de cartão (03/04) se tiver todos os dados obrigatórios
             boolean isCard = sale.getPaymentMethod() == PaymentMethod.CREDIT_CARD || sale.getPaymentMethod() == PaymentMethod.DEBIT_CARD;
             boolean hasCardData = isCard && sale.getCardBrand() != null && !sale.getCardBrand().isBlank()
                     && sale.getCardAuthorization() != null && !sale.getCardAuthorization().isBlank();
@@ -230,7 +240,7 @@ public class FiscalSimplifyService {
                 formaPag = mapPaymentMethodToFiscalNfce(sale.getPaymentMethod());
             }
             pag.put("forma", formaPag);
-            pag.put("valor", total);
+            pag.put("valor", total.setScale(2, java.math.RoundingMode.HALF_UP));
             pagamentos.add(pag);
         }
         nfceReq.put("pagamentos", pagamentos);
@@ -256,9 +266,6 @@ public class FiscalSimplifyService {
         return fiscalSimplifyClient.getNfcePdf(nfceId);
     }
 
-    /**
-     * Monta o payload e emite NF-e para a venda. Retorna o mapa de resposta (id, chave, numero) para o caller persistir na Sale.
-     */
     public Map<String, Object> emitirNfe(Sale sale, List<SaleItem> items) {
         if (!enabled) {
             throw new IllegalStateException("Integração Fiscal Simplify está desabilitada.");
@@ -289,7 +296,6 @@ public class FiscalSimplifyService {
                 ? parseSerie(tenant.getEcfSeries()) : SERIE_PADRAO);
         nfeReq.put("naturezaOperacao", "VENDA");
 
-        // Destinatário obrigatório em NF-e: nome + CPF/CNPJ + endereço (da venda ou do cadastro do cliente)
         String docCliente = resolveCustomerDocumentForNfe(sale);
         String nomeDest = (sale.getCustomerName() != null && !sale.getCustomerName().isBlank())
                 ? sale.getCustomerName().trim() : resolveCustomerNameForNfe(sale);
@@ -322,6 +328,19 @@ public class FiscalSimplifyService {
         nfeReq.put("destinatario", dest);
 
         List<Map<String, Object>> itens = new ArrayList<>();
+        BigDecimal totalVenda = sale.getTotal() != null ? sale.getTotal() : BigDecimal.ZERO;
+        totalVenda = totalVenda.setScale(2, java.math.RoundingMode.HALF_UP);
+        BigDecimal baseItens = BigDecimal.ZERO;
+        for (SaleItem item : items) {
+            BigDecimal qty = item.getQuantity() != null ? item.getQuantity() : BigDecimal.ONE;
+            BigDecimal vu = item.getUnitPrice() != null ? item.getUnitPrice() : BigDecimal.ZERO;
+            baseItens = baseItens.add(vu.multiply(qty));
+        }
+        BigDecimal ratio = (baseItens.compareTo(BigDecimal.ZERO) > 0)
+                ? totalVenda.divide(baseItens, 12, java.math.RoundingMode.HALF_UP)
+                : BigDecimal.ONE;
+
+        BigDecimal acumulado = BigDecimal.ZERO;
         for (SaleItem item : items) {
             Product p = item.getProduct();
             String descricao = (item.getProductName() != null && !item.getProductName().isBlank())
@@ -333,9 +352,16 @@ public class FiscalSimplifyService {
                     : (p != null && p.getSku() != null && !p.getSku().isBlank() ? p.getSku() : null);
             String ncm = (p != null && p.getNcm() != null && p.getNcm().length() == 8) ? p.getNcm() : NCM_PADRAO;
             BigDecimal qty = item.getQuantity() != null ? item.getQuantity() : BigDecimal.ONE;
-            BigDecimal valorUnitario = item.getUnitPrice() != null ? item.getUnitPrice() : BigDecimal.ZERO;
+            BigDecimal valorUnitarioBase = item.getUnitPrice() != null ? item.getUnitPrice() : BigDecimal.ZERO;
+            BigDecimal valorUnitario = valorUnitarioBase.multiply(ratio).setScale(2, java.math.RoundingMode.HALF_UP);
             if (qty.compareTo(BigDecimal.ZERO) > 0 && valorUnitario.compareTo(BigDecimal.ZERO) == 0) {
-                valorUnitario = item.getTotal().divide(qty, 4, java.math.RoundingMode.HALF_UP);
+                valorUnitario = item.getTotal().divide(qty, 2, java.math.RoundingMode.HALF_UP);
+            }
+            if (itens.size() == items.size() - 1 && baseItens.compareTo(BigDecimal.ZERO) > 0) {
+                BigDecimal restante = totalVenda.subtract(acumulado);
+                if (qty.compareTo(BigDecimal.ZERO) > 0) {
+                    valorUnitario = restante.divide(qty, 2, java.math.RoundingMode.HALF_UP);
+                }
             }
             Map<String, Object> itemMap = new LinkedHashMap<>();
             if (codigo != null) itemMap.put("codigo", codigo.length() > 60 ? codigo.substring(0, 60) : codigo);
@@ -345,13 +371,13 @@ public class FiscalSimplifyService {
             itemMap.put("quantidade", qty);
             itemMap.put("valorUnitario", valorUnitario);
             itens.add(itemMap);
+            acumulado = acumulado.add(valorUnitario.multiply(qty));
         }
         nfeReq.put("itens", itens);
 
         return fiscalSimplifyClient.emitirNfe(nfeReq);
     }
 
-    /** Documento do cliente: da venda, do cadastro (customerId) ou único cliente com mesmo nome no tenant. */
     private String resolveCustomerDocumentForNfe(Sale sale) {
         if (sale == null) return null;
         if (sale.getCustomerDocument() != null && !sale.getCustomerDocument().isBlank()) return sale.getCustomerDocument();
@@ -389,10 +415,6 @@ public class FiscalSimplifyService {
         }
     }
 
-    /**
-     * Forma de pagamento para NFC-e. Cartão crédito/débito é enviado como "90 - Outros"
-     * para não exigir dados do cartão na SEFAZ (VendaLume não envia e não armazena dados de cartão).
-     */
     private String mapPaymentMethodToFiscalNfce(PaymentMethod pm) {
         if (pm == null) return "99";
         return switch (pm) {
@@ -408,7 +430,7 @@ public class FiscalSimplifyService {
     }
 
     private String mapPaymentMethodToFiscal(PaymentMethod pm) {
-        if (pm == null) return "99"; // Outros
+        if (pm == null) return "99";
         return switch (pm) {
             case CASH -> "01";
             case CHECK -> "02";
