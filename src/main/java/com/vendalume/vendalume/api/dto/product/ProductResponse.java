@@ -9,10 +9,13 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 /**
  * DTO de resposta com dados do produto.
+ *
+ * Pode incluir lotes (opcional; normalmente preenchido no endpoint de detalhe).
  *
  * @author VendaLume
  * @version 1.0.0
@@ -77,4 +80,5 @@ public class ProductResponse {
     private Long version;
     private Instant createdAt;
     private Instant updatedAt;
+    private List<ProductLotResponse> lots;
 }

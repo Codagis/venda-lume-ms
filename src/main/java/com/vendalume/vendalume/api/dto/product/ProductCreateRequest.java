@@ -9,10 +9,14 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 /**
  * DTO de requisição para criação de produto.
+ *
+ * Suporta lotes (opcional): se informado e com controle de estoque ativo (trackStock=true),
+ * o estoque pode ser calculado a partir da soma das quantidades dos lotes.
  *
  * @author VendaLume
  * @version 1.0.0
@@ -178,4 +182,5 @@ public class ProductCreateRequest {
 
     @Size(max = 500)
     private String videoUrl;
+    private List<ProductLotRequest> lots;
 }

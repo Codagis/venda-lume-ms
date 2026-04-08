@@ -3,10 +3,14 @@ package com.vendalume.vendalume.service;
 import com.vendalume.vendalume.api.dto.product.PageResponse;
 import com.vendalume.vendalume.api.dto.product.ProductCreateRequest;
 import com.vendalume.vendalume.api.dto.product.ProductFilterRequest;
+import com.vendalume.vendalume.api.dto.product.ProductLotRequest;
+import com.vendalume.vendalume.api.dto.product.ProductLotResponse;
 import com.vendalume.vendalume.api.dto.product.ProductResponse;
 import com.vendalume.vendalume.api.dto.product.ProductUpdateRequest;
 import com.vendalume.vendalume.api.exception.ResourceNotFoundException;
 import com.vendalume.vendalume.domain.entity.Product;
+import com.vendalume.vendalume.domain.entity.ProductLot;
+import com.vendalume.vendalume.repository.ProductLotRepository;
 import com.vendalume.vendalume.repository.ProductRepository;
 import com.vendalume.vendalume.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +27,7 @@ import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Serviço de gestão de produtos.
@@ -38,6 +43,7 @@ public class ProductService {
     private static final List<String> ALLOWED_SORT_FIELDS = List.of("name", "sku", "unitPrice", "displayOrder", "createdAt");
 
     private final ProductRepository productRepository;
+    private final ProductLotRepository productLotRepository;
 
     @Transactional
     public ProductResponse create(ProductCreateRequest request) {
@@ -58,10 +64,12 @@ public class ProductService {
         }
 
         Product product = toEntity(request, tenantId);
+        applyLotsToProductForCreateOrUpdate(product, request.getLots());
         product.setCreatedBy(userId);
         product.setUpdatedBy(userId);
         product = productRepository.save(product);
 
+        upsertLots(tenantId, product.getId(), userId, request.getLots());
         return toResponse(product);
     }
 
@@ -70,7 +78,14 @@ public class ProductService {
         UUID tenantId = SecurityUtils.requireTenantId();
         Product product = productRepository.findByIdAndTenantId(id, tenantId)
                 .orElseThrow(() -> new ResourceNotFoundException("Produto", id));
-        return toResponse(product);
+        List<ProductLotResponse> lots = productLotRepository
+                .findByTenantIdAndProductIdOrderByExpiresAtAscLotCodeAsc(tenantId, id)
+                .stream()
+                .map(this::toLotResponse)
+                .toList();
+        ProductResponse base = toResponse(product);
+        base.setLots(lots);
+        return base;
     }
 
     @Transactional(readOnly = true)
@@ -222,9 +237,13 @@ public class ProductService {
         }
 
         updateEntity(product, request);
+        applyLotsToProductForCreateOrUpdate(product, request.getLots());
         product.setUpdatedBy(userId);
         product = productRepository.save(product);
 
+        if (request.getLots() != null) {
+            upsertLots(tenantId, id, userId, request.getLots());
+        }
         return toResponse(product);
     }
 
@@ -442,6 +461,53 @@ public class ProductService {
                 .version(p.getVersion())
                 .createdAt(p.getCreatedAt())
                 .updatedAt(p.getUpdatedAt())
+                .build();
+    }
+
+    private void applyLotsToProductForCreateOrUpdate(Product product, List<ProductLotRequest> lots) {
+        if (!Boolean.TRUE.equals(product.getTrackStock())) return;
+        if (lots == null || lots.isEmpty()) return;
+
+        java.math.BigDecimal total = java.math.BigDecimal.ZERO;
+        for (ProductLotRequest l : lots) {
+            if (l == null) continue;
+            java.math.BigDecimal q = l.getQuantity() != null ? l.getQuantity() : java.math.BigDecimal.ZERO;
+            total = total.add(q);
+        }
+        product.setStockQuantity(total);
+    }
+
+    private void upsertLots(UUID tenantId, UUID productId, UUID userId, List<ProductLotRequest> lots) {
+        if (lots == null) return;
+        productLotRepository.deleteByTenantIdAndProductId(tenantId, productId);
+
+        List<ProductLot> entities = lots.stream()
+                .filter(l -> l != null)
+                .map(l -> ProductLot.builder()
+                        .tenantId(tenantId)
+                        .productId(productId)
+                        .lotCode(l.getLotCode() != null ? l.getLotCode().trim() : null)
+                        .expiresAt(l.getExpiresAt())
+                        .quantity(l.getQuantity() != null ? l.getQuantity() : java.math.BigDecimal.ZERO)
+                        .createdBy(userId)
+                        .updatedBy(userId)
+                        .build())
+                .collect(Collectors.toList());
+
+        if (!entities.isEmpty()) {
+            productLotRepository.saveAll(entities);
+        }
+    }
+
+    private ProductLotResponse toLotResponse(ProductLot l) {
+        return ProductLotResponse.builder()
+                .id(l.getId())
+                .lotCode(l.getLotCode())
+                .expiresAt(l.getExpiresAt())
+                .quantity(l.getQuantity())
+                .version(l.getVersion())
+                .createdAt(l.getCreatedAt())
+                .updatedAt(l.getUpdatedAt())
                 .build();
     }
 }

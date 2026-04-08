@@ -9,10 +9,13 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 /**
  * DTO de requisição para atualização de produto.
+ *
+ * Suporta lotes (opcional): quando informado, substitui os lotes atuais do produto.
  *
  * @author VendaLume
  * @version 1.0.0
@@ -176,4 +179,5 @@ public class ProductUpdateRequest {
 
     @Size(max = 500)
     private String videoUrl;
+    private List<ProductLotRequest> lots;
 }
