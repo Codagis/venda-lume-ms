@@ -269,6 +269,7 @@ public class SaleInvoiceImportService {
                 );
             } catch (Exception e) {
                 log.warn("Falha ao extrair XML: {}", e.getMessage());
+                throw new IllegalArgumentException("XML inválido ou ilegível: " + e.getMessage());
             }
         }
 

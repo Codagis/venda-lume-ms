@@ -397,7 +397,7 @@ public class SaleService {
             }
         }
         if (request.getCustomerDocument() != null) {
-            String v = request.getCustomerDocument().trim();
+            String v = sanitizeCustomerDocument(request.getCustomerDocument());
             String current = sale.getCustomerDocument() != null ? sale.getCustomerDocument() : "";
             if (!v.equals(current)) {
                 sale.setCustomerDocument(v.isEmpty() ? null : v);
@@ -615,7 +615,7 @@ public class SaleService {
     }
 
     private SaleResponse toResponse(Sale s) {
-        List<SaleItem> rawItems = saleItemRepository.findBySaleIdOrderByItemOrderAsc(s.getId());
+        List<SaleItem> rawItems = saleItemRepository.findBySaleIdWithProductOrderByItemOrderAsc(s.getId());
         List<SaleItemResponse> items = rawItems.stream()
                 .map(this::toItemResponse)
                 .toList();
@@ -766,9 +766,25 @@ public class SaleService {
 
     private boolean hasValidCustomerDocument(Sale sale) {
         String doc = resolveCustomerDocument(sale);
+        return isValidCustomerDocumentDigits(doc);
+    }
+
+    private boolean isValidCustomerDocumentDigits(String doc) {
         if (doc == null || doc.isBlank()) return false;
         String digits = doc.replaceAll("\\D", "");
         return digits.length() == 11 || digits.length() == 14;
+    }
+
+    /** Normaliza CPF/CNPJ para apenas dígitos quando válido; vazio limpa o campo. */
+    private String sanitizeCustomerDocument(String raw) {
+        if (raw == null) return "";
+        String trimmed = raw.trim();
+        if (trimmed.isEmpty()) return "";
+        String digits = trimmed.replaceAll("\\D", "");
+        if (digits.length() == 11 || digits.length() == 14) {
+            return digits;
+        }
+        return trimmed;
     }
 
     private boolean computeCanEmitNfe(UUID tenantId, List<SaleItem> items, Sale sale) {

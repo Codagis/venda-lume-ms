@@ -99,6 +99,16 @@ public class FiscalDocumentsController {
         return ResponseEntity.ok(fiscalDocumentsService.listarNfeRecebidas(tenantId, top, skip, inlinecount, distNsu, formaDistribuicao, chaveAcesso));
     }
 
+    @Operation(summary = "Buscar na SEFAZ notas em que a empresa é destinatária (distribuição DF-e)")
+    @PostMapping("/nfe/received/sync")
+    @PreAuthorize("hasAuthority('PERMISSION_FISCAL_VIEW') or hasAuthority('PERMISSION_FULL_SYSTEM_ACCESS')")
+    public ResponseEntity<Map<String, Object>> sincronizarNfeRecebidas(
+            @RequestParam(required = false) UUID tenantId,
+            @RequestParam(required = false, name = "dist_nsu") Integer distNsu
+    ) {
+        return ResponseEntity.ok(fiscalDocumentsService.sincronizarNfeRecebidas(tenantId, distNsu));
+    }
+
     @Operation(summary = "Detalhar documento de distribuição NF-e (recebida) por ID")
     @GetMapping("/nfe/received/{id}")
     @PreAuthorize("hasAuthority('PERMISSION_FISCAL_VIEW') or hasAuthority('PERMISSION_FULL_SYSTEM_ACCESS')")

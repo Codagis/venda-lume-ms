@@ -66,6 +66,16 @@ public class FiscalDocumentsService {
     }
 
     @Transactional(readOnly = true)
+    public Map<String, Object> sincronizarNfeRecebidas(UUID tenantId, Integer distNsu) {
+        Tenant tenant = resolveTenant(tenantId);
+        String cnpj = requireTenantCnpj(tenant);
+        String ambiente = resolveAmbienteNfe(tenant);
+        String uf = resolveUfAutor(tenant);
+        log.info("Fiscal: sincronizar NF-e recebidas tenantId={} cnpj={} uf={}", tenant.getId(), cnpj, uf);
+        return fiscalSimplifyClient.sincronizarNfeRecebidas(cnpj, ambiente, uf, distNsu);
+    }
+
+    @Transactional(readOnly = true)
     public Map<String, Object> detalharNfeRecebida(UUID tenantId, String docId) {
         Tenant tenant = resolveTenant(tenantId);
         requireTenantCnpj(tenant); // valida tenant
@@ -235,6 +245,51 @@ public class FiscalDocumentsService {
         if (tenant == null) return "homologacao";
         String amb = tenant.getAmbienteFiscal();
         return (amb != null && amb.equalsIgnoreCase("producao")) ? "producao" : "homologacao";
+    }
+
+    private String resolveUfAutor(Tenant tenant) {
+        if (tenant == null) return "SP";
+        if (tenant.getAddressState() != null && !tenant.getAddressState().isBlank()) {
+            return tenant.getAddressState().trim().toUpperCase();
+        }
+        String cMun = tenant.getCodigoMunicipio();
+        if (cMun != null && cMun.length() >= 2) {
+            return mapCodigoUfParaSigla(cMun.substring(0, 2));
+        }
+        return "SP";
+    }
+
+    private static String mapCodigoUfParaSigla(String prefixo) {
+        return switch (prefixo) {
+            case "12" -> "AC";
+            case "27" -> "AL";
+            case "16" -> "AP";
+            case "13" -> "AM";
+            case "29" -> "BA";
+            case "23" -> "CE";
+            case "53" -> "DF";
+            case "32" -> "ES";
+            case "52" -> "GO";
+            case "21" -> "MA";
+            case "51" -> "MT";
+            case "50" -> "MS";
+            case "31" -> "MG";
+            case "15" -> "PA";
+            case "25" -> "PB";
+            case "41" -> "PR";
+            case "26" -> "PE";
+            case "22" -> "PI";
+            case "33" -> "RJ";
+            case "24" -> "RN";
+            case "43" -> "RS";
+            case "11" -> "RO";
+            case "14" -> "RR";
+            case "42" -> "SC";
+            case "35" -> "SP";
+            case "28" -> "SE";
+            case "17" -> "TO";
+            default -> "SP";
+        };
     }
 }
 

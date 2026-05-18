@@ -9,6 +9,8 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -66,6 +68,20 @@ public class GlobalExceptionHandler {
                         .status(HttpStatus.FORBIDDEN.value())
                         .error("Forbidden")
                         .message(ex.getMessage())
+                        .build());
+    }
+
+    @ExceptionHandler({MultipartException.class, MaxUploadSizeExceededException.class})
+    public ResponseEntity<ErrorResponse> handleMultipart(MultipartException ex) {
+        String msg = ex instanceof MaxUploadSizeExceededException
+                ? "Arquivo muito grande para upload."
+                : "Falha no envio do arquivo. Use multipart/form-data com o campo xml ou json.";
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResponse.builder()
+                        .timestamp(Instant.now().toString())
+                        .status(HttpStatus.BAD_REQUEST.value())
+                        .error("Bad Request")
+                        .message(msg)
                         .build());
     }
 

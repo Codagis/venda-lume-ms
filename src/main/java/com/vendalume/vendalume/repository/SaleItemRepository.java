@@ -27,6 +27,14 @@ public interface SaleItemRepository extends JpaRepository<SaleItem, UUID> {
             """, nativeQuery = true)
     List<SaleItem> findBySaleIdOrderByItemOrderAsc(@Param("saleId") UUID saleId);
 
+    @Query("""
+            SELECT si FROM SaleItem si
+            LEFT JOIN FETCH si.product
+            WHERE si.sale.id = :saleId
+            ORDER BY si.itemOrder ASC, si.id ASC
+            """)
+    List<SaleItem> findBySaleIdWithProductOrderByItemOrderAsc(@Param("saleId") UUID saleId);
+
     @Query(value = """
             SELECT * FROM sale_items
             WHERE product_id = CAST(:productId AS UUID)

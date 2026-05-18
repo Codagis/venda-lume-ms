@@ -39,14 +39,25 @@ public class SaleInvoiceImportController {
     public ResponseEntity<Map<String, Object>> importInvoice(
             @RequestParam(required = false) UUID tenantId,
             @RequestParam(required = false) SaleType saleType,
-            @RequestPart(required = false) MultipartFile pdf,
-            @RequestPart(required = false) MultipartFile xml,
-            @RequestPart(required = false) MultipartFile json,
+            @RequestParam(value = "pdf", required = false) MultipartFile pdf,
+            @RequestParam(value = "xml", required = false) MultipartFile xml,
+            @RequestParam(value = "json", required = false) MultipartFile json,
+            @RequestParam(value = "file", required = false) MultipartFile file,
             @RequestParam(required = false) String jsonText,
             @RequestParam(required = false) String notes
     ) {
+        MultipartFile xmlPart = xml;
+        MultipartFile jsonPart = json;
+        if ((xmlPart == null || xmlPart.isEmpty()) && (jsonPart == null || jsonPart.isEmpty()) && file != null && !file.isEmpty()) {
+            String name = file.getOriginalFilename() != null ? file.getOriginalFilename().toLowerCase() : "";
+            if (name.endsWith(".json")) {
+                jsonPart = file;
+            } else {
+                xmlPart = file;
+            }
+        }
         Map<String, Object> result = saleInvoiceImportService.importSaleFromInvoice(
-                tenantId, saleType, pdf, xml, json, jsonText, notes
+                tenantId, saleType, pdf, xmlPart, jsonPart, jsonText, notes
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }

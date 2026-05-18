@@ -378,6 +378,35 @@ public class FiscalSimplifyClient {
     }
 
     @SuppressWarnings("unchecked")
+    public Map<String, Object> sincronizarNfeRecebidas(String cnpj, String ambiente, String ufAutor, Integer distNsu) {
+        if (!enabled) throw new IllegalStateException("Fiscal Simplify está desabilitado.");
+        String cnpjLimpo = cnpj != null ? cnpj.replaceAll("\\D", "") : "";
+        String amb = (ambiente != null && ambiente.equalsIgnoreCase("producao")) ? "producao" : "homologacao";
+        String uf = (ufAutor != null && !ufAutor.isBlank()) ? ufAutor.trim().toUpperCase() : "SP";
+        try {
+            Map<String, Object> result = client().post()
+                    .uri(uriBuilder -> {
+                        var b = uriBuilder.path("/nfe/received/sync")
+                                .queryParam("cnpj", cnpjLimpo)
+                                .queryParam("ambiente", amb)
+                                .queryParam("ufAutor", uf);
+                        if (distNsu != null) b.queryParam("dist_nsu", distNsu);
+                        return b.build();
+                    })
+                    .retrieve()
+                    .bodyToMono(Map.class)
+                    .block();
+            return result != null ? result : Map.of();
+        } catch (WebClientResponseException e) {
+            log.error("Fiscal Simplify erro ao sincronizar NF-e recebidas: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw new RuntimeException("Falha ao buscar NF-e na SEFAZ: " + e.getResponseBodyAsString(), e);
+        } catch (Exception e) {
+            log.error("Erro ao sincronizar NF-e recebidas no Fiscal Simplify", e);
+            throw new RuntimeException("Falha ao buscar NF-e na SEFAZ: " + e.getMessage(), e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
     public Map<String, Object> listarNfeRecebidas(
             String cnpj,
             String ambiente,
